@@ -1,0 +1,141 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  mariadb:
+    image: 'mariadb:latest'
+    hostname: mariadb
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: metastore_db
+    networks:
+      - trino-network
+
+  hive-metastore:
+    image: 'bitsondatadev/hive-metastore:latest'
+    hostname: hive-metastore
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      - ./conf/metastore-site.xml:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml:ro
+    environment:
+      METASTORE_DB_HOSTNAME: mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - trino-network
+
+  minio:
+    image: 'minio/minio:latest'
+    hostname: minio
+    container_name: minio
+    ports:
+      - '9000:9000'
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data
+    networks:
+      - trino-network
+
+  neo4j:
+      image: neo4j:3.5.26
+      container_name: neo4j_amundsen
+      environment:
+        - NEO4J_AUTH=neo4j/test
+      ulimits:
+        nofile:
+          soft: 40000
+          hard: 40000
+      ports:
+          - 7474:7474
+          - 7687:7687
+      volumes:
+          - ./example/docker/neo4j/conf:/var/lib/neo4j/conf
+          - ./example/docker/neo4j/plugins:/var/lib/neo4j/plugins
+          - ./example/backup:/backup
+          - neo4j_data:/data
+      networks:
+        - trino-network
+  elasticsearch:
+      image: elasticsearch:7.13.3
+      container_name: es_amundsen
+      ports:
+          - 9200:9200
+      volumes:
+        - es_data:/usr/share/elasticsearch/data
+      networks:
+        - trino-network
+      ulimits:
+        nofile:
+          soft: 65536
+          hard: 65536
+      environment:
+        - discovery.type=single-node
+  amundsensearch:
+      image: amundsendev/amundsen-search:2.11.1
+      container_name: amundsensearch
+      ports:
+        - 5001:5000
+      depends_on:
+        - elasticsearch
+      networks:
+        - trino-network
+      environment:
+        - PROXY_ENDPOINT=es_amundsen
+      command: gunicorn -w 2 --bind :5000 search_service.search_wsgi
+  amundsenmetadata:
+      image: amundsendev/amundsen-metadata:3.9.0
+      container_name: amundsenmetadata
+      depends_on:
+        - neo4j
+      ports:
+        - 5002:5000
+      networks:
+        - trino-network
+      environment:
+         - PROXY_HOST=bolt://neo4j_amundsen
+      command: gunicorn -w 2 --bind :5000 metadata_service.metadata_wsgi
+  amundsenfrontend:
+      image: amundsendev/amundsen-frontend:3.12.0
+      container_name: amundsenfrontend
+      depends_on:
+        - amundsenmetadata
+        - amundsensearch
+      ports:
+        - 5000:5000
+      networks:
+        - trino-network
+      environment:
+        - SEARCHSERVICE_BASE=http://amundsensearch:5000
+        - METADATASERVICE_BASE=http://amundsenmetadata:5000
+        # Only for easy config-less Quickstart bookmark evalutation. `TestConfig` extends ordinary `LocalConfig` by
+        # defining `AUTH_USER_METHOD` to a hardcoded dummy user in `amundsen_application.tests.test_utils.get_test_user()`
+        # See further docs in https://github.com/amundsen-io/amundsenfrontendlibrary/blob/master/docs/configuration.md#flask
+        # and https://github.com/amundsen-io/amundsenfrontendlibrary/blob/master/docs/configuration.md#authentication
+        - FRONTEND_SVC_CONFIG_MODULE_CLASS=amundsen_application.config.TestConfig
+      command: gunicorn -w 2 --bind :5000 amundsen_application.wsgi
+
+volumes:
+  minio-data:
+    driver: local
+  es_data:
+  neo4j_data:
+
+networks:
+  trino-network:
+    driver: bridge

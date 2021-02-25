@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  mongodb:
+    image: 'mongo:latest'
+    hostname: mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongodb/database:/data/db
+    networks:
+      - trino-network
+
+networks:
+  trino-network:
+    driver: bridge

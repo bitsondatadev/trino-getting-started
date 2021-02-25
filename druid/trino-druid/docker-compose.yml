@@ -1,0 +1,137 @@
+version: '3.7'
+volumes:
+  metadata_data: {}
+
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  postgres:
+    image: 'postgres:latest'
+    container_name: postgres
+    volumes:
+      - metadata_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=FoolishPassword
+      - POSTGRES_USER=druid
+      - POSTGRES_DB=druid
+    networks:
+      - trino-network
+
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:latest'
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - trino-network
+
+  druid-coordinator:
+    image: 'apache/druid:0.21.0'
+    container_name: druid-coordinator
+    ports:
+      - '8081:8081'
+    volumes:
+      - ./storage:/opt/data
+      - ./druid/coordinator_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+    command:
+      - coordinator
+    env_file:
+      - environment
+    networks:
+      - trino-network
+
+  druid-broker:
+    image: 'apache/druid:0.21.0'
+    container_name: druid-broker
+    ports:
+      - '8082:8082'
+    volumes:
+      - ./druid/broker_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    command:
+      - broker
+    env_file:
+      - environment
+    networks:
+      - trino-network
+
+  druid-historical:
+    image: 'apache/druid:0.21.0'
+    container_name: druid-historical
+    ports:
+      - '8083:8083'
+    volumes:
+      - ./storage:/opt/data
+      - ./druid/historical_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    command:
+      - historical
+    env_file:
+      - environment
+    networks:
+      - trino-network
+
+  druid-middlemanager:
+    image: 'apache/druid:0.21.0'
+    container_name: druid-middlemanager
+    ports:
+      - '8091:8091'
+      - '8100-8105:8100-8105'
+    volumes:
+      - ./storage:/opt/data
+      - ./druid/middle_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    command:
+      - middleManager
+    env_file:
+      - environment
+    networks:
+      - trino-network
+
+  druid-router:
+    image: 'apache/druid:0.21.0'
+    container_name: druid-router
+    ports:
+      - '8888:8888'
+    volumes:
+      - ./druid/router_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+      - druid-coordinator
+    command:
+      - router
+    env_file:
+      - environment
+    networks:
+      - trino-network
+
+networks:
+  trino-network:
+    driver: bridge
+
+
+

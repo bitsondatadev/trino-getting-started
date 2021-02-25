@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+      - ./conf/core-site.xml:/etc/hadoop/conf/core-site.xml:ro
+      - ./conf/hdfs-site.xml:/etc/hadoop/conf/hdfs-site.xml:ro
+    networks:
+      - trino-network
+
+  hadoop-node:
+    image: 'ghcr.io/trinodb/testing/hive3.1-hive:latest'
+    hostname: hadoop-node
+    ports:
+      - '3306:3306' # Metastore MySQL Database
+      - '9083:9083' # Metastore Thrift
+      - '9864:9864' # DataNode Web UI since Hadoop 3
+      - '9870:9870' # NameNode Web UI since Hadoop 3
+      - '10000:10000' # HiveServer2
+    volumes:
+      - ./conf/core-site.xml:/etc/hadoop/conf/core-site.xml:ro
+    networks:
+      - trino-network
+
+networks:
+  trino-network:
+    driver: bridge
