@@ -175,7 +175,7 @@ scheme of Trino's use of it in the Hive connector.
 Open another terminal and run the following command:
 
 ```
-docker container exec -it "hive-minio_mariadb_1" /bin/bash
+docker container exec -it "trino-minio_mariadb_1" /bin/bash
 ```
 
 Once you see the `root@mariadb` terminal, enter into the cli.
@@ -199,6 +199,14 @@ SELECT
 FROM metastore_db.DBS;
 ```
 
+```
++-------+---------------------------+---------+------------+------------+-----------+
+| DB_ID | DB_LOCATION_URI           | NAME    | OWNER_NAME | OWNER_TYPE | CTLG_NAME |
++-------+---------------------------+---------+------------+------------+-----------+
+|     1 | file:/user/hive/warehouse | default | public     | ROLE       | hive      |
+|     2 | s3a://tiny/               | tiny    | trino      | USER       | hive      |
++-------+---------------------------+---------+------------+------------+-----------+
+```
 This shows the databases. What may be strange at first glance, is this is
 showing the schema that we created under the database table. This is because
 the Hive metastore has two abstractions for its metadata, databases and tables.
@@ -226,6 +234,14 @@ FROM metastore_db.TBLS t
 WHERE d.NAME = 'tiny';
 ```
 
+```
++--------+-------+-------+----------+----------------+-------+
+| TBL_ID | DB_ID | OWNER | TBL_NAME | TBL_TYPE       | SD_ID |
++--------+-------+-------+----------+----------------+-------+
+|      1 |     2 | trino | customer | EXTERNAL_TABLE |     1 |
++--------+-------+-------+----------+----------------+-------+
+```
+
 There's nothing unexpected here. You should note that the `DB_ID` matches with
 the id of the `tiny` database (ie schema) name. The owner is the same `trino`
 user from our trino instance. The `TBL_NAME` is the name of the `customer`
@@ -248,6 +264,14 @@ FROM metastore_db.TBLS t
   ON t.SD_ID = s.SD_ID
 WHERE t.TBL_NAME = 'customer'
  AND d.NAME='tiny';
+```
+
+```
++-------+-------------------------------------------------+---------------------+----------+
+| SD_ID | INPUT_FORMAT                                    | LOCATION            | SERDE_ID |
++-------+-------------------------------------------------+---------------------+----------+
+|     1 | org.apache.hadoop.hive.ql.io.orc.OrcInputFormat | s3a://tiny/customer |        1 |
++-------+-------------------------------------------------+---------------------+----------+
 ```
 
 This table should contain a row that matches the `SD_ID` from the last query
@@ -274,7 +298,15 @@ FROM metastore_db.TBLS t
   ON s.SERDE_ID = sd.SERDE_ID
 WHERE t.TBL_NAME = 'customer'
  AND d.NAME='tiny';
- ```
+```
+
+```
++----------+----------+-------------------------------------------+
+| SERDE_ID | NAME     | SLIB                                      |
++----------+----------+-------------------------------------------+
+|        1 | customer | org.apache.hadoop.hive.ql.io.orc.OrcSerde |
++----------+----------+-------------------------------------------+
+```
 
 This is a pretty simple table, you will notice the `NAME` refers to the table
 the serializer is used for, and `SLIB` is the serializer library used when
@@ -294,7 +326,22 @@ FROM metastore_db.TBLS t
 WHERE t.TBL_NAME = 'customer'
  AND d.NAME='tiny'
 ORDER by CD_ID, INTEGER_IDX;
-  ```
+```
+
+```
++-------+---------+-------------+--------------+-------------+
+| CD_ID | COMMENT | COLUMN_NAME | TYPE_NAME    | INTEGER_IDX |
++-------+---------+-------------+--------------+-------------+
+|     1 | NULL    | custkey     | bigint       |           0 |
+|     1 | NULL    | name        | varchar(25)  |           1 |
+|     1 | NULL    | address     | varchar(40)  |           2 |
+|     1 | NULL    | nationkey   | bigint       |           3 |
+|     1 | NULL    | phone       | varchar(15)  |           4 |
+|     1 | NULL    | acctbal     | double       |           5 |
+|     1 | NULL    | mktsegment  | varchar(10)  |           6 |
+|     1 | NULL    | comment     | varchar(117) |           7 |
++-------+---------+-------------+--------------+-------------+
+```
 
 You'll notice that the `COLUMNS_V2` table has a foreign key `CD_ID` to the
 `SDS` storage table. Each key will correlate to a specific table and so you'll
@@ -305,5 +352,15 @@ see that the columns are for the `customer` table. You can now notice the
 So now you have a working understanding of the Hive metastore and the model
 it uses to store metadata about the files that are generated and written to
 when inserting using the Hive connector. 
+
+### Stopping Services
+
+Once you complete this tutorial, the resources used for this excercise can be released
+by runnning the following command:
+
+```
+docker-compose down
+```
+
 
 See trademark and other [legal notices](https://trino.io/legal.html).
