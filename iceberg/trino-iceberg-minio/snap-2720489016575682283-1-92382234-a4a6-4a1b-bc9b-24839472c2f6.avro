@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Error><Code>AccessDenied</Code><Message>Access Denied.</Message><Key>logging.db/events/metadata/snap-2720489016575682283-1-92382234-a4a6-4a1b-bc9b-24839472c2f6.avro</Key><BucketName>iceberg</BucketName><Resource>/iceberg/logging.db/events/metadata/snap-2720489016575682283-1-92382234-a4a6-4a1b-bc9b-24839472c2f6.avro</Resource><RequestId>1686199917B8B558</RequestId><HostId>235ac3a4-361e-4b6c-aeb6-cbdab177469a</HostId></Error>

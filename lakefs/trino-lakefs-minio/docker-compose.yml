@@ -1,0 +1,122 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  mariadb:
+    image: 'mariadb:latest'
+    hostname: mariadb
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: metastore_db
+    networks:
+      - trino-network
+
+  hive-metastore:
+    image: 'bitsondatadev/hive-metastore:latest'
+    hostname: hive-metastore
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      - ./conf/metastore-site.xml:/opt/apache-hive-metastore-3.0.0-bin/conf/metastore-site.xml:ro
+    environment:
+      METASTORE_DB_HOSTNAME: mariadb
+    depends_on:
+      - mariadb
+    networks:
+      - trino-network
+
+  lakefs-setup:
+    image: treeverse/lakefs:latest
+    container_name: lakefs-setup
+    depends_on:
+      - postgres
+      - minio-setup
+    environment:
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_DATABASE_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKECTL_CREDENTIALS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+      - LAKECTL_CREDENTIALS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      - LAKECTL_SERVER_ENDPOINT_URL=http://lakefs:8000
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+    entrypoint: ["/app/wait-for", "postgres:5432", "--", "sh", "-c",
+      "lakefs setup --user-name docker --access-key-id  AKIAIOSFODNN7EXAMPLE --secret-access-key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY && lakectl repo create lakefs://example s3://example"
+      ]
+    networks:
+      - trino-network
+
+  minio-setup:
+    image: minio/mc
+    container_name: minio-setup
+    environment:
+        - MC_HOST_lakefs=http://minio:minio123@minio:9000
+    depends_on:
+      - minio
+    command: ["mb", "lakefs/example"]
+    networks:
+      - trino-network
+
+
+  lakefs:
+    image: treeverse/lakefs:latest
+    container_name: lakefs
+    ports:
+      - 8000:8000
+    depends_on:
+      - postgres
+    environment:
+      - LAKEFS_BLOCKSTORE_TYPE=s3
+      - LAKEFS_BLOCKSTORE_S3_FORCE_PATH_STYLE=true
+      - LAKEFS_BLOCKSTORE_S3_ENDPOINT=http://minio:9000
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_ACCESS_KEY_ID=minio
+      - LAKEFS_BLOCKSTORE_S3_CREDENTIALS_SECRET_ACCESS_KEY=minio123
+      - LAKEFS_AUTH_ENCRYPT_SECRET_KEY=some random secret string
+      - LAKEFS_DATABASE_CONNECTION_STRING=postgres://lakefs:lakefs@postgres/postgres?sslmode=disable
+      - LAKEFS_STATS_ENABLED=false
+      - LAKEFS_LOGGING_LEVEL
+    entrypoint: ["/app/wait-for", "postgres:5432", "--", "/app/lakefs", "run"]
+    networks:
+      - trino-network
+
+  postgres:
+    image: postgres:11
+    container_name: postgres
+    environment:
+      POSTGRES_USER: lakefs
+      POSTGRES_PASSWORD: lakefs
+    networks:
+      - trino-network
+
+  minio:
+    image: 'minio/minio:latest'
+    hostname: minio
+    container_name: minio
+    ports:
+      - '9000:9000'
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server /data
+    networks:
+      - trino-network
+
+volumes:
+  minio-data:
+    driver: local
+
+networks:
+  trino-network:
+    driver: bridge
