@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  mysql:
+    image: mysql:latest
+    hostname: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_DATABASE: tiny
+    ports:
+      - '3306:3306'
+    networks:
+      - trino-network
+networks:
+  trino-network:
+    driver: bridge
+

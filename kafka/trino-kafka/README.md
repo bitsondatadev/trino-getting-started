@@ -13,7 +13,7 @@ In this tutorial, you will:
 ### Running Services
 
 First, you want to start the services. Make sure that you are in the 
-`trino-getting-started/mongo/trino-kafka` directory. Now run the following
+`trino-getting-started/kafka/trino-kafka` directory. Now run the following
 command:
 
 ```
