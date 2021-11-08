@@ -102,10 +102,10 @@ CREATE TABLE mysql.tiny.customer
 AS SELECT * FROM tpch.tiny.customer;
 ```
 
-Now there is a table under MinIO, you can query this data by checking the
+Now there is a table under MySQL, you can query this data by checking the
 following.
 ```
-SELECT * FROM msql.tiny.customer LIMIT 5;
+SELECT * FROM mysql.tiny.customer LIMIT 5;
 ```
 
 The results should look like this:
