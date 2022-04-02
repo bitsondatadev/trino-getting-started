@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  trino-coordinator:
+    image: 'trinodb/trino:latest'
+    hostname: trino-coordinator
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./etc:/etc/trino
+    networks:
+      - trino-network
+
+  zeppelin-node:
+     image: 'apache/zeppelin:0.10.1'
+     hostname: zeppelin-node
+     ports:
+       - '8082:8082'
+     volumes:
+       - ./zeppelin-conf:/opt/zeppelin/conf
+       - ./notebook:/opt/zeppelin/notebook
+       - ./driver/trino-jdbc.jar:/opt/zeppelin/interpreter/jdbc/trino-jdbc.jar:ro
+     networks:
+       - trino-network
+networks:
+  trino-network:
+    driver: bridge
