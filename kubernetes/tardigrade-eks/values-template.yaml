@@ -1,0 +1,65 @@
+image:
+  tag: "<trino-version>"
+server:
+  workers: <number-of-workers>
+  config:
+    memory:
+      heapHeadroomPerNode: "30GB"
+    query:
+      maxMemory: "1TB"
+      maxMemoryPerNode: "70GB"
+  exchangeManager:
+    baseDir: "s3://<spool-bucket-name>"
+coordinator:
+  jvm:
+    maxHeapSize: "100G"
+    gcMethod:
+      type: "UseG1GC"
+      g1:
+        heapRegionSize: "32M"
+  resources:
+    requests:
+      memory: "120Gi"
+      cpu: 31
+    limits:
+      memory: "120Gi"
+      cpu: 31
+worker:
+  jvm:
+    maxHeapSize: "100G"
+    gcMethod:
+      type: "UseG1GC"
+      g1:
+        heapRegionSize: "32M"
+  resources:
+    requests:
+      memory: "120Gi"
+      cpu: 31
+    limits:
+      memory: "120Gi"
+      cpu: 31
+additionalConfigProperties:
+  - "retry-policy=TASK"
+  - "query.hash-partition-count=50"
+  - "fault-tolerant-execution-target-task-input-size=4GB"
+  - "fault-tolerant-execution-target-task-split-count=64"
+  - "fault-tolerant-execution-task-memory=5GB"
+  - "task.writer-count=4"
+  - "task.concurrency=8"
+  - "scale-writers=true"
+  - "exchange.compression-enabled=true"
+  - "query.low-memory-killer.delay=0s"
+additionalExchangeManagerProperties:
+  - "exchange.s3.region=<aws-region>"
+  - "exchange.s3.aws-access-key=<access-key>"
+  - "exchange.s3.aws-secret-key=<secret-key>"
+additionalCatalogs:
+  hive: |-
+    connector.name=hive-hadoop2
+    hive.metastore=glue
+    hive.metastore.glue.region=<aws-region>
+    hive.metastore.glue.aws-access-key=<access-key>
+    hive.metastore.glue.aws-secret-key=<secret-key>
+    hive.s3.aws-access-key=<access-key>
+    hive.s3.aws-secret-key=<secret-key>
+    hive.metastore.glue.default-warehouse-dir=s3://<permanent-data-bucket>/
