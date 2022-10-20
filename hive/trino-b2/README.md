@@ -102,7 +102,7 @@ If you don't see the B2 Cloud Storage menu, you need to [enable B2 on your Backb
 
 Click **Create a Bucket** and name the bucket `trino-tiny`, as the dataset we will be transferring will be small.
 
-![Create a bucket](./assets/create_bucket.png)
+<img src="./assets/create_bucket.png" alt="Create a bucket" width="400">
 
 Leave the remaining settings with their defaults and click **Create a Bucket**. 
 
@@ -116,11 +116,11 @@ Now you have a bucket in Backblaze B2, you have to create an application key tha
 
 It's good practice to limit a key to access a single bucket if you can, so name the key `trino-tiny` and select `trino-tiny` in the **Allow Access to Bucket(s)** dropdown. Many tools require the ability to list all of the buckets in an account, even if they will only be using a single bucket, so enable **Allow List All Bucket Names**. Leave the remaining settings with their defaults and click **Create New Key**.
 
-![Create an Application Key](./assets/add_app_key.png)
+<img src="./assets/add_app_key.png" alt="Create an Application Key" width="400">
 
 **IMPORTANT**: You MUST copy the application key immediately after you create it. You cannot access the key after you leave this page. Make a note of the key id as well as the application key.
 
-![Application Key](./assets/application_key.png)
+<img src="./assets/application_key.png" alt="Application Key" width="500">
 
 ### Configuring Trino
 
