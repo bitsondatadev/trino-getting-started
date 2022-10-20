@@ -3,7 +3,7 @@
 
     <property>
         <name>fs.defaultFS</name>
-        <value>s3a://drivestats-parquet</value>
+        <value>s3a://BUCKET_NAME</value>
     </property>
 
 
@@ -15,17 +15,17 @@
 
     <property>
         <name>fs.s3a.endpoint</name>
-        <value><your endpoint></value>
+        <value>ENDPOINT</value>
     </property>
 
     <property>
         <name>fs.s3a.access.key</name>
-        <value><your key id></value>
+        <value>KEY_ID</value>
     </property>
 
     <property>
         <name>fs.s3a.secret.key</name>
-        <value><your application key></value>
+        <value>APPLICATION_KEY</value>
     </property>
 
     <property>
