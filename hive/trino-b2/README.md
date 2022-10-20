@@ -1,6 +1,6 @@
 # Hive connector over Backblaze B2 Cloud Storage
 
-TBD - update for B2!
+This tutorial is closely based on the [trino-b2](../trino-b2) tutorial by [bitsondatadev](/bitsondatadev). In this version of the tutorial, you will configure Trino to use [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) for file storage.
 
 ## Introduction 
 If you are new to Trino or Presto®, I recommend that you check out the following
@@ -12,14 +12,14 @@ In this tutorial, you will:
  1. Learn how to run a CTAS (CREATE TABLE AS) statement in Trino.
  2. Learn the roles of the Trino runtime, metastore, and storage.
  3. Dive into the relational database that contains the Hive model and metadata
-    that is stored in the Hive metstore service.
- 
+    that is stored in the Hive metastore service.
+
 ## Steps
 
 ### Running Services
 
 First, you want to start the services. Make sure that you are in the 
-`trino-getting-started/hive/trino-minio` directory. Now run the following
+`trino-getting-started/hive/trino-b2` directory. Now run the following
 command:
 
 ```
@@ -30,12 +30,11 @@ You should expect to see the following output (you may also have to download
 the Docker images before you see the "done" message):
 
 ```
-Creating network "trino-minio_trino-network" with driver "bridge"
-Creating volume "trino-minio_minio-data" with local driver
-Creating minio                          ... done
-Creating trino-minio_trino-coordinator_1 ... done
-Creating trino-minio_mariadb_1           ... done
-Creating trino-minio_hive-metastore_1    ... done
+[+] Running 4/4
+ ⠿ Network trino-b2_trino-network          Created  0.0s
+ ⠿ Container trino-b2-mariadb-1            Started  0.6s
+ ⠿ Container trino-b2-trino-coordinator-1  Started  0.6s
+ ⠿ Container trino-b2-hive-metastore-1     Started  0.7s
 ```
 
 ### Open Trino CLI
@@ -43,11 +42,11 @@ Creating trino-minio_hive-metastore_1    ... done
 Once this is complete, you can log into the Trino coordinator node. We will
 do this by using the [`exec`](https://docs.docker.com/engine/reference/commandline/exec/)
 command and run the `trino` CLI executable as the command we run on that
-container. Notice the container id is `trino-minio_trino-coordinator_1` so the
+container. Notice the container id is `trino-b2_trino-coordinator_1` so the
 command you will run is:
 
 ```
-docker container exec -it trino-minio_trino-coordinator_1 trino
+docker container exec -it trino-b2-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
@@ -58,41 +57,47 @@ trino>
  
 The first step to understanding the Hive metastore's role in the Hive
 connector is to run a CTAS (CREATE TABLE AS) query that pushes data from one of
-the TPC connectors into the hive catalog that points to MinIO. The TPC
+the TPC connectors into the hive catalog that points to Backblaze B2. The TPC
 connectors generate data on the fly so that we can run simple tests like this.
 
-First, run a command to show the catalogs to see the `tpch` and `minio` catalogs
+First, run a command to show the catalogs to see the `tpch` and `b2` catalogs
 since these are what we will use in the CTAS query.
 
 ```
 SHOW CATALOGS;
 ```
 
-You should see that the minio catalog is registered. This is actually a Hive
-connector configured under the name `minio` to delineate the underlying storage
+You should see that the b2 catalog is registered. This is actually a Hive
+connector configured under the name `b2` to delineate the underlying storage
 we are using.
 
-### Create Bucket in MinIO
+### Create a Backblaze Account
+
+If you already have a Backblaze account with B2 enabled, you can skip to the next section.
+
+If you have a Backblaze account, but you don't see the **B2 Cloud Storage** menu on the left after you sign in, then you need to enable Backblaze B2 for your account. On the left, under Account, click **My Settings**, then, under Enabled Products, click the checkbox for **B2 Cloud Storage**.
+
+The page will refresh and you will see the B2 Cloud Storage menu on the left.
+
+If you do not yet have a Backblaze account, navigate to the [Backblaze B2 signup page](https://www.backblaze.com/b2/sign-up.html?referrer=nopref), enter your email address and a password, and click **Sign Up for Backblaze B2**. Your account includes 10 GB of storage free of charge, and you don't need to submit any credit card details.
+
+### Create a Bucket in Backblaze B2
 
 If we look at the Trino Architecture, we're first going to prep the file storage
 where the actual data will reside. In earlier iterations of big data systems,
 this layer was commonly HDFS or other S3 compatible storage and AWS S3. For our
-example, we're using MinIO which is also S3 compatible. Creating a bucket gives
+example, we're using Backblaze B2, which is also S3 compatible. Creating a bucket gives
 us a location to write our data to and we can tell Trino where to find it.
 
 ![Storage](./assets/storage.png)
 
-Now, open the [MinIO UI](http://localhost:9000) and log in using:
+Sign in to Backblaze B2, and click 
 
-Access Key: minio
-
-Secret Key: minio123
-
-![MinIO Login Screen](./assets/login.png)
+![Backblaze B2 Login Screen](./assets/login.png)
 
 Upon logging in, you will see the following screen. 
 
-![Minio File Browser](./assets/minio.png)
+![Minio File Browser](./assets/b2.png)
 
 Create a Bucket by clicking (+) button and create bucket.
 
@@ -104,8 +109,8 @@ Name the bucket `tiny` as the dataset we will be transferring will be small.
 
 ### Querying Trino
 
-Now that we've set up the MinIO bucket, lets move to creating our SCHEMA that
-points us to the bucket in MinIO and then run our CTAS query. When we create a
+Now that we've set up the Backblaze B2 bucket, lets move to creating our SCHEMA that
+points us to the bucket in Backblaze B2 and then run our CTAS query. When we create a
 table using CTAS, we're telling the table to copy the table schema and the
 data from the source table into the table we're creating. This will make more
 sense when you see the query below.
@@ -119,26 +124,26 @@ Hive and MySQL
 
 ![Runtime](./assets/runtime.png)
 
-Back in the terminal create the minio.tiny SCHEMA. This will be the first call
-to the metastore to save the location of the S3 schema location in MinIO.
+Back in the terminal create the b2.tiny SCHEMA. This will be the first call
+to the metastore to save the location of the S3 schema location in Backblaze B2.
 
 ```
-CREATE SCHEMA minio.tiny
+CREATE SCHEMA b2.tiny
 WITH (location = 's3a://tiny/');
 ```
 
 Now that we have a SCHEMA that references the bucket where we store our tables 
-in MinIO, we now can create our first table.
+in Backblaze B2, we now can create our first table.
 
 Optional: To view your queries run, log into the 
 [Trino UI](http://localhost:8080) and log in using any username (it doesn't
  matter since no security is set up).
 
-Move the customer data from the tiny generated tpch data into MinIO uing a CTAS
+Move the customer data from the tiny generated tpch data into Backblaze B2 uing a CTAS
 query. Run the following query and if you like, watch it running on the Trino UI:
 
 ```
-CREATE TABLE minio.tiny.customer
+CREATE TABLE b2.tiny.customer
 WITH (
     format = 'ORC',
     external_location = 's3a://tiny/customer/'
@@ -146,19 +151,19 @@ WITH (
 AS SELECT * FROM tpch.tiny.customer;
 ```
 
-Go back to the [MinIO UI](http://localhost:9000), and click under the tiny 
+Go back to the [Backblaze B2 UI](http://localhost:9000), and click under the tiny 
 bucket. You will now see a `customer` directory generated from that table and
 underneath that directory will be a file with a name comprised of uuid and date.
-This is the orc file generated by the trino runtime residing in MinIO.
+This is the orc file generated by the trino runtime residing in Backblaze B2.
 
-Now there is a table under MinIO, you can query this data by checking the
+Now there is a table under Backblaze B2, you can query this data by checking the
 following.
 ```
-SELECT * FROM minio.tiny.customer LIMIT 50;
+SELECT * FROM b2.tiny.customer LIMIT 50;
 ```
 
 So the question now is how does Trino know where to find the orc file residing
-in MinIO when all we specify is the catalog, schema, and table? How does Trino
+in Backblaze B2 when all we specify is the catalog, schema, and table? How does Trino
 know what columns exist in the orc file, and even the file it is retrieving
 is an orc file to being with? Find out more in the next step.
 
@@ -177,7 +182,7 @@ scheme of Trino's use of it in the Hive connector.
 Open another terminal and run the following command:
 
 ```
-docker container exec -it "trino-minio_mariadb_1" /bin/bash
+docker container exec -it "trino-b2_mariadb_1" /bin/bash
 ```
 
 Once you see the `root@mariadb` terminal, enter into the cli.
@@ -215,7 +220,7 @@ the Hive metastore has two abstractions for its metadata, databases and tables.
 Since Trino follows the traditional 3 level ANSI SQL catalog standard, schema
 is equivalent to a database. So just as a database contains multiple tables,
 a schema will contain multiple tables. Notice the `DB_LOCATION_URI` is in the
-bucket location created before in MinIO and set when you created this schema. 
+bucket location created before in Backblaze B2 and set when you created this schema. 
 The owner is the `trino` user coming from the user in the trino instance. Also
 note the `CTLG_NAME` references the trino catalog.
 
@@ -283,7 +288,7 @@ notice the `LOCATION` is the schema location we set. If we hadn't set this it
 would have defaulted to `<schema_url>/<table_name>`. Then there is the
 `SERDE_ID`. SerDe is an abbreviation for serializer/deserializer. This will
 point us to another table that contains the information to find which serializer
-to use when parsing the file in MinIO.
+to use when parsing the file in Backblaze B2.
 
 To find out the serializer used, run the following query:
 ```
@@ -312,7 +317,7 @@ WHERE t.TBL_NAME = 'customer'
 
 This is a pretty simple table, you will notice the `NAME` refers to the table
 the serializer is used for, and `SLIB` is the serializer library used when
-parsing the file in MinIO.
+parsing the file in Backblaze B2.
 
 Our last metadata query is looking at the columns on the table.
 
@@ -354,6 +359,8 @@ see that the columns are for the `customer` table. You can now notice the
 So now you have a working understanding of the Hive metastore and the model
 it uses to store metadata about the files that are generated and written to
 when inserting using the Hive connector. 
+
+### Accessing the Backblaze Drive Stats Data Set
 
 ### Stopping Services
 
