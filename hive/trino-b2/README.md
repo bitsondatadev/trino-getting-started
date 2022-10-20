@@ -163,6 +163,12 @@ Once you've completed editing the configuration files, save them, and restart Tr
 docker compose restart trino-b2-trino-coordinator-1
 ```
 
+You will also need to restart the Trino CLI:
+
+```
+docker container exec -it trino-b2-trino-coordinator-1 trino
+```
+
 ### Querying Trino
 
 Now that we've set up the Backblaze B2 bucket and application key, lets move to creating a SCHEMA that
@@ -433,17 +439,66 @@ In total, each record currently comprises 179 fields of data describing the stat
 
 The entire Backblaze Drive Stats data set is available in Parquet format in a public Backblaze B2 bucket. At the time of writing, the data set comprises 161 files occupying 17.6 GB of storage.
 
-drivestats-parquet
-s3.us-west-004.backblazeb2.com
+To access the Drive Stats data set via Trino, [start Trino as explained above](#running-services), then follow the [instructions above for configuring Trino](#configuring-trino), with the following configuration values: 
+
+* `BUCKET_NAME`: `drivestats-parquet`
+* `APPLICATION_KEY`: `s3.us-west-004.backblazeb2.com`
+* `KEY_ID`: `0045f0571db506a0000000007`
+* `ENDPOINT`: `K004cogT4GIeHHfhCyPPLsPBT4NyY1A`
+
+Run the following commands to copy the [Drive Stats schema](drivestats.sql) into the Trino container and load it into the metastore:
+
+```
+docker cp drivestats.sql trino-b2-trino-coordinator-1:/etc/trino/drivestats.sql
+docker container exec -it trino-b2-trino-coordinator-1 trino -f /etc/trino/drivestats.sql
+```
+
+Now open the CLI, setting the default catalog and schema:
+
+```
+docker container exec -it trino-b2-trino-coordinator-1 trino --catalog b2 --schema ds
+```
+
+Here are some sample queries to get you started:
+
+#### How many records are in the current Drive Stats data set?
+```sql
+SELECT COUNT(*) 
+FROM drivestats;
+```
+
+#### How many hard drives was Backblaze spinning on a given date?
+```sql
+SELECT COUNT(*) 
+FROM drivestats 
+WHERE year = 2022 AND month = 9 AND day = 30;
+```
+
+#### How many exabytes of raw storage was Backblaze managing on a given date?
+```sql
+SELECT ROUND(SUM(CAST(capacity_bytes AS bigint))/1e+18, 2) 
+FROM drivestats 
+WHERE year = 2022 AND month = 9 AND day = 30;
+```
+
+#### What are the top 10 most common drive models in the data set?
+```sql
+SELECT model, COUNT(DISTINCT serial_number) AS count 
+FROM drivestats 
+GROUP BY model
+ORDER BY count DESC
+LIMIT 10;
+```
+
+You can learn more about querying the Drive Stats data set from [Querying a Decade of Drive Stats Data](http://linktbd).
 
 ### Stopping Services
 
-Once you complete this tutorial, the resources used for this exercise can be released
+Once you're done, the resources used for this exercise can be released
 by running the following command:
 
 ```
 docker-compose down
 ```
-
 
 See trademark and other [legal notices](https://trino.io/legal.html).
