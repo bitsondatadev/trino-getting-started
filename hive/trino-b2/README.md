@@ -1,4 +1,4 @@
-# Hive connector over Backblaze B2 Cloud Storage
+# Hive Connector over Backblaze B2 Cloud Storage
 
 This tutorial is closely based on the [trino-b2](../trino-b2) tutorial by [bitsondatadev](/bitsondatadev). In this version of the tutorial, you will configure Trino to use [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) for file storage.
 
@@ -75,11 +75,14 @@ we are using.
 
 If you already have a Backblaze account with B2 enabled, you can skip to the next section.
 
+<a name="enable-b2-existing-account"></a>
 If you have a Backblaze account, but you don't see the **B2 Cloud Storage** menu on the left after you sign in, then you need to enable Backblaze B2 for your account. On the left, under Account, click **My Settings**, then, under Enabled Products, click the checkbox for **B2 Cloud Storage**.
+
+![Enable B2](./assets/enable_b2.png)
 
 The page will refresh and you will see the B2 Cloud Storage menu on the left.
 
-If you do not yet have a Backblaze account, navigate to the [Backblaze B2 signup page](https://www.backblaze.com/b2/sign-up.html?referrer=nopref), enter your email address and a password, and click **Sign Up for Backblaze B2**. Your account includes 10 GB of storage free of charge, and you don't need to submit any credit card details.
+If you do not yet have a Backblaze account, navigate to the [Backblaze B2 signup page](https://www.backblaze.com/b2/sign-up.html?referrer=nopref), enter your email address and a password, and click **Sign Up for Backblaze B2**. Your account includes 10 GB of storage free of charge, and you don't need to submit any credit card details until you need more.
 
 ### Create a Bucket in Backblaze B2
 
@@ -91,25 +94,78 @@ us a location to write our data to and we can tell Trino where to find it.
 
 ![Storage](./assets/storage.png)
 
-Sign in to Backblaze B2, and click 
+[Sign in to Backblaze B2](https://www.backblaze.com/user_signin.htm), and, in the **B2 Cloud Storage** menu on the left, click **Buckets**.
 
-![Backblaze B2 Login Screen](./assets/login.png)
+![Click Buckets](./assets/click_buckets.png)
 
-Upon logging in, you will see the following screen. 
+If you don't see the B2 Cloud Storage menu, you need to [enable B2 on your Backblaze account](#enable-b2-existing-account).
 
-![Minio File Browser](./assets/b2.png)
+Click **Create a Bucket** and name the bucket `trino-tiny`, as the dataset we will be transferring will be small.
 
-Create a Bucket by clicking (+) button and create bucket.
+![Create a bucket](./assets/create_bucket.png)
 
-![Add bucket](./assets/bucket.png)
+Leave the remaining settings with their defaults and click **Create a Bucket**. 
 
-Name the bucket `tiny` as the dataset we will be transferring will be small.
+Make a note of the endpoint value in the bucket details; you'll need that to configure Trino in a moment.
 
-![](./assets/tiny.png)
+![Bucket Endpoint](./assets/bucket_endpoint.png)
+
+### Create an Application Key in Backblaze B2
+
+Now you have a bucket in Backblaze B2, you have to create an application key that Trino's Hive connector can use to access it. In the menu on the left, under **Account**, click **App Keys**, then click **Add a New Application Key**.
+
+It's good practice to limit a key to access a single bucket if you can, so name the key `trino-tiny` and select `trino-tiny` in the **Allow Access to Bucket(s)** dropdown. Many tools require the ability to list all of the buckets in an account, even if they will only be using a single bucket, so enable **Allow List All Bucket Names**. Leave the remaining settings with their defaults and click **Create New Key**.
+
+![Create an Application Key](./assets/add_app_key.png)
+
+**IMPORTANT**: You MUST copy the application key immediately after you create it. You cannot access the key after you leave this page. Make a note of the key id as well as the application key.
+
+![Application Key](./assets/application_key.png)
+
+### Configuring Trino
+
+We need to configure Trino's Hive Connector to access the bucket in Backblaze B2. There are several edits across three configuration files, so, before you start, ensure you have the required information to hand. The configuration files contain the following placeholders:
+
+* `BUCKET_NAME`
+* `APPLICATION_KEY`  
+* `KEY_ID`
+* `ENDPOINT`
+
+The `BUCKET_NAME` is `trino-tiny`; you should have a note of `APPLICATION_KEY`, `KEY_ID` and `ENDPOINT` from creating the bucket and application key earlier.
+
+Edit each of the following three files and replace the placeholders with your values:
+
+* `conf/core-site.xml`
+* `conf/metastore-site.xml`
+* `etc/catalog/b2.properties`
+
+For example, in `conf/core-site.xml`, the first edit is to change
+
+```xml
+    <property>
+        <name>fs.defaultFS</name>
+        <value>s3a://BUCKET_NAME</value>
+    </property>
+```
+
+to
+
+```xml
+    <property>
+        <name>fs.defaultFS</name>
+        <value>s3a://drivestats-parquet</value>
+    </property>
+```
+
+Once you've completed editing the configuration files, save them, and restart Trino by running the following command from the `trino-getting-started/hive/trino-b2` directory:
+
+```
+docker compose restart trino-b2-trino-coordinator-1
+```
 
 ### Querying Trino
 
-Now that we've set up the Backblaze B2 bucket, lets move to creating our SCHEMA that
+Now that we've set up the Backblaze B2 bucket and application key, lets move to creating a SCHEMA that
 points us to the bucket in Backblaze B2 and then run our CTAS query. When we create a
 table using CTAS, we're telling the table to copy the table schema and the
 data from the source table into the table we're creating. This will make more
@@ -129,7 +185,7 @@ to the metastore to save the location of the S3 schema location in Backblaze B2.
 
 ```
 CREATE SCHEMA b2.tiny
-WITH (location = 's3a://tiny/');
+WITH (location = 's3a://trino-tiny/');
 ```
 
 Now that we have a SCHEMA that references the bucket where we store our tables 
@@ -139,25 +195,25 @@ Optional: To view your queries run, log into the
 [Trino UI](http://localhost:8080) and log in using any username (it doesn't
  matter since no security is set up).
 
-Move the customer data from the tiny generated tpch data into Backblaze B2 uing a CTAS
+Move the customer data from the tiny generated tpch data into Backblaze B2 using a CTAS
 query. Run the following query and if you like, watch it running on the Trino UI:
 
 ```
 CREATE TABLE b2.tiny.customer
 WITH (
     format = 'ORC',
-    external_location = 's3a://tiny/customer/'
+    external_location = 's3a://trino-tiny/customer/'
 ) 
 AS SELECT * FROM tpch.tiny.customer;
 ```
 
-Go back to the [Backblaze B2 UI](http://localhost:9000), and click under the tiny 
-bucket. You will now see a `customer` directory generated from that table and
+Go back to the [Backblaze B2 UI](https://secure.backblaze.com/b2_buckets.htm), and click the **Upload/Download** button for the `trino-tiny` bucket. You will now see a `customer` directory generated from that table and
 underneath that directory will be a file with a name comprised of uuid and date.
-This is the orc file generated by the trino runtime residing in Backblaze B2.
+This is the orc file generated by the Trino runtime residing in Backblaze B2.
 
 Now there is a table under Backblaze B2, you can query this data by checking the
 following.
+
 ```
 SELECT * FROM b2.tiny.customer LIMIT 50;
 ```
@@ -211,7 +267,7 @@ FROM metastore_db.DBS;
 | DB_ID | DB_LOCATION_URI           | NAME    | OWNER_NAME | OWNER_TYPE | CTLG_NAME |
 +-------+---------------------------+---------+------------+------------+-----------+
 |     1 | file:/user/hive/warehouse | default | public     | ROLE       | hive      |
-|     2 | s3a://tiny/               | tiny    | trino      | USER       | hive      |
+|     2 | s3a://trino-tiny/         | tiny    | trino      | USER       | hive      |
 +-------+---------------------------+---------+------------+------------+-----------+
 ```
 This shows the databases. What may be strange at first glance, is this is
@@ -274,11 +330,11 @@ WHERE t.TBL_NAME = 'customer'
 ```
 
 ```
-+-------+-------------------------------------------------+---------------------+----------+
-| SD_ID | INPUT_FORMAT                                    | LOCATION            | SERDE_ID |
-+-------+-------------------------------------------------+---------------------+----------+
-|     1 | org.apache.hadoop.hive.ql.io.orc.OrcInputFormat | s3a://tiny/customer |        1 |
-+-------+-------------------------------------------------+---------------------+----------+
++-------+-------------------------------------------------+---------------------------+----------+
+| SD_ID | INPUT_FORMAT                                    | LOCATION                  | SERDE_ID |
++-------+-------------------------------------------------+---------------------------+----------+
+|     1 | org.apache.hadoop.hive.ql.io.orc.OrcInputFormat | s3a://trino-tiny/customer |        1 |
++-------+-------------------------------------------------+---------------------------+----------+
 ```
 
 This table should contain a row that matches the `SD_ID` from the last query
@@ -362,10 +418,28 @@ when inserting using the Hive connector.
 
 ### Accessing the Backblaze Drive Stats Data Set
 
+[Drive Stats](https://www.backblaze.com/b2/hard-drive-test-data.html) is an open-source data set of the daily metrics on the hard drives in Backblaze’s cloud storage infrastructure that Backblaze has open-sourced starting with April 2013. Currently, Drive Stats comprises over 346 million records, rising by over 200,000 records per day. Drive Stats is an append-only dataset effectively logging daily statistics that once written are never updated or deleted.
+
+Each day, we collect a Drive Stats record from each hard drive containing the following data:
+
+* **date**: the date of collection.
+* **serial_number**: the unique serial number of the drive.
+* **model**: the manufacturer’s model number of the drive.
+* **capacity_bytes**: the drive’s capacity, in bytes.
+* **failure**: 1 if this was the last day that the drive was operational before failing, 0 if all is well.
+* **A collection of [SMART](https://www.backblaze.com/blog/what-smart-stats-indicate-hard-drive-failures/) attributes**. The number of attributes collected has risen over time; currently we store 87 SMART attributes in each record, each one in both raw and normalized form, with field names of the form smart_n_normalized and smart_n_raw, where n is between 1 and 255.
+
+In total, each record currently comprises 179 fields of data describing the state of an individual hard drive on a given day (the number of SMART attributes collected has risen over time).
+
+The entire Backblaze Drive Stats data set is available in Parquet format in a public Backblaze B2 bucket. At the time of writing, the data set comprises 161 files occupying 17.6 GB of storage.
+
+drivestats-parquet
+s3.us-west-004.backblazeb2.com
+
 ### Stopping Services
 
-Once you complete this tutorial, the resources used for this excercise can be released
-by runnning the following command:
+Once you complete this tutorial, the resources used for this exercise can be released
+by running the following command:
 
 ```
 docker-compose down
