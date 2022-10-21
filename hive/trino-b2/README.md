@@ -446,10 +446,9 @@ To access the Drive Stats data set via Trino, [start Trino as explained above](#
 * `KEY_ID`: `0045f0571db506a0000000007`
 * `ENDPOINT`: `K004cogT4GIeHHfhCyPPLsPBT4NyY1A`
 
-Run the following commands to copy the [Drive Stats schema](drivestats.sql) into the Trino container and load it into the metastore:
+Run the following commands to copy the [Drive Stats schema](etc/drivestats.sql) into the Trino container and load it into the metastore:
 
 ```
-docker cp drivestats.sql trino-b2-trino-coordinator-1:/etc/trino/drivestats.sql
 docker container exec -it trino-b2-trino-coordinator-1 trino -f /etc/trino/drivestats.sql
 ```
 
