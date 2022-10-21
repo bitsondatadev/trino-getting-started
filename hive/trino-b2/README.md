@@ -1,6 +1,6 @@
 # Hive Connector over Backblaze B2 Cloud Storage
 
-This tutorial is closely based on the [trino-b2](../trino-b2) tutorial by [bitsondatadev](/bitsondatadev). In this version of the tutorial, you will configure Trino to use [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) for file storage.
+This tutorial is closely based on the [trino-minio](../trino-minio) tutorial by [bitsondatadev](/bitsondatadev). In this version of the tutorial, you will configure Trino to use [Backblaze B2 Cloud Storage](https://www.backblaze.com/b2/cloud-storage.html) for file storage.
 
 ## Introduction 
 If you are new to Trino or Presto®, I recommend that you check out the following
