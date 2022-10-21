@@ -96,7 +96,7 @@ us a location to write our data to and we can tell Trino where to find it.
 
 [Sign in to Backblaze B2](https://www.backblaze.com/user_signin.htm), and, in the **B2 Cloud Storage** menu on the left, click **Buckets**.
 
-![Click Buckets](./assets/click_buckets.png)
+<img src="./assets/click_buckets.png" alt="Click Buckets" width="800">
 
 If you don't see the B2 Cloud Storage menu, you need to [enable B2 on your Backblaze account](#enable-b2-existing-account).
 
@@ -108,7 +108,7 @@ Leave the remaining settings with their defaults and click **Create a Bucket**.
 
 Make a note of the endpoint value in the bucket details; you'll need that to configure Trino in a moment.
 
-![Bucket Endpoint](./assets/bucket_endpoint.png)
+<img src="./assets/bucket_endpoint.png" alt="Bucket Endpoint" width="800">
 
 ### Create an Application Key in Backblaze B2
 
