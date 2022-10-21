@@ -78,7 +78,7 @@ If you already have a Backblaze account with B2 enabled, you can skip to the nex
 <a name="enable-b2-existing-account"></a>
 If you have a Backblaze account, but you don't see the **B2 Cloud Storage** menu on the left after you sign in, then you need to enable Backblaze B2 for your account. On the left, under Account, click **My Settings**, then, under Enabled Products, click the checkbox for **B2 Cloud Storage**.
 
-![Enable B2](./assets/enable_b2.png)
+<img src="./assets/enable_b2.png" alt="Enable B2" width="800">
 
 The page will refresh and you will see the B2 Cloud Storage menu on the left.
 
