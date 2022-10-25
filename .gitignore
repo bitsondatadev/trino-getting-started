@@ -21,3 +21,6 @@ hs_err_pid*
 *.iml
 
 /superset/
+
+# Mac
+.DS_Store
