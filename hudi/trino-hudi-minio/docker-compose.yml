@@ -17,7 +17,8 @@ services:
       - hive-metastore 
       - minio
     volumes:
-      - ./conf/spark-defaults.conf:/spark/conf/spark-defaults.conf:ro
+      - ./conf/spark-defaults.conf:/spark-3.2.1-bin-hadoop3.2/conf/spark-defaults.conf:ro
+      - ./conf/core-site.xml:/spark-3.2.1-bin-hadoop3.2/conf/core-site.xml:ro
     environment:
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
