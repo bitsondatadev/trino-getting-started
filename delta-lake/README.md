@@ -24,17 +24,6 @@ Start the Docker containers:
 docker-compose up -d
 ```
 
-Create a bucket in MinIO with the following steps:
-
-1. Open a browser to http://<host>:9001, if running on your local machine
-   [http://localhost:9001](http://localhost:9001)
-2. Log in with username `minio` and password `minio123`, see `docker-compose.yml`
-3. Click on **Create Bucket** near the top right.
-4. Enter `claudiustestbucket` in the **Bucket Name** field. If you use a
-   different name make sure to use that as the location when you use
-   `CREATE SCHEMA`.
-5. Click on **Create Bucket** in the lower right to confirm.
-
 Connect with your SQL client of choice. The following steps are applicable with
 [DBeaver](https://dbeaver.io/download).
 
