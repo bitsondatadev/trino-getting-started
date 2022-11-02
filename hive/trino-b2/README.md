@@ -11,8 +11,8 @@ blog to get a sense for the Hive connector architecture. [A gentle
 In this tutorial, you will:
  1. Learn how to run a CTAS (CREATE TABLE AS) statement in Trino.
  2. Learn the roles of the Trino runtime, metastore, and storage.
- 3. Dive into the relational database that contains the Hive model and metadata
-    that is stored in the Hive metastore service.
+ 3. Dive into the relational database that contains the Hive model and metadata that is stored in the Hive metastore service.
+ 4. Run SQL queries against the real-world [Backblaze Drive Stats](https://www.backblaze.com/b2/hard-drive-test-data.html) public data set.
 
 ## Steps
 
@@ -424,9 +424,9 @@ when inserting using the Hive connector.
 
 ### Accessing the Backblaze Drive Stats Data Set
 
-[Drive Stats](https://www.backblaze.com/b2/hard-drive-test-data.html) is an open-source data set of the daily metrics on the hard drives in Backblaze’s cloud storage infrastructure that Backblaze has open-sourced starting with April 2013. Currently, Drive Stats comprises over 346 million records, rising by over 200,000 records per day. Drive Stats is an append-only dataset effectively logging daily statistics that once written are never updated or deleted.
+[Drive Stats](https://www.backblaze.com/b2/hard-drive-test-data.html) is a public data set of the daily metrics on the hard drives in Backblaze’s cloud storage infrastructure that Backblaze has open-sourced starting with April 2013. Currently, Drive Stats comprises over 346 million records, rising by over 200,000 records per day. Drive Stats is an append-only dataset effectively logging daily statistics that once written are never updated or deleted.
 
-Each day, we collect a Drive Stats record from each hard drive containing the following data:
+Each day, Backblaze collects a Drive Stats record from each hard drive containing the following data:
 
 * **date**: the date of collection.
 * **serial_number**: the unique serial number of the drive.
@@ -442,9 +442,9 @@ The entire Backblaze Drive Stats data set is available in Parquet format in a pu
 To access the Drive Stats data set via Trino, [start Trino as explained above](#running-services), then follow the [instructions above for configuring Trino](#configuring-trino), with the following configuration values: 
 
 * `BUCKET_NAME`: `drivestats-parquet`
-* `APPLICATION_KEY`: `s3.us-west-004.backblazeb2.com`
+* `APPLICATION_KEY`: `K004cogT4GIeHHfhCyPPLsPBT4NyY1A`
 * `KEY_ID`: `0045f0571db506a0000000007`
-* `ENDPOINT`: `K004cogT4GIeHHfhCyPPLsPBT4NyY1A`
+* `ENDPOINT`: `s3.us-west-004.backblazeb2.com`
 
 Run the following command to load the [Drive Stats schema](etc/drivestats.sql) into Trino's metastore:
 
