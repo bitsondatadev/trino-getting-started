@@ -5,6 +5,7 @@ CREATE SCHEMA IF NOT EXISTS b2.ds
 USE b2.ds;
 
 CREATE TABLE drivestats (
+                            date DATE,
                             serial_number VARCHAR,
                             model VARCHAR,
                             capacity_bytes BIGINT,
@@ -191,4 +192,5 @@ CREATE TABLE drivestats (
         partitioned_by = ARRAY['year', 'month'],
         external_location = 's3a://drivestats-parquet/drivestats');
 
+-- Tell the Hive connector to scan the partitions for the drivestats table
 CALL system.sync_partition_metadata('ds', 'drivestats', 'FULL');
