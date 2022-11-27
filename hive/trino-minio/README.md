@@ -31,9 +31,9 @@ the Docker images before you see the "done" message):
 Creating network "trino-minio_trino-network" with driver "bridge"
 Creating volume "trino-minio_minio-data" with local driver
 Creating minio                          ... done
-Creating trino-minio_trino-coordinator_1 ... done
-Creating trino-minio_mariadb_1           ... done
-Creating trino-minio_hive-metastore_1    ... done
+Creating trino-minio-trino-coordinator-1 ... done
+Creating trino-minio-mariadb-1           ... done
+Creating trino-minio-hive-metastore-1    ... done
 ```
 
 ### Open Trino CLI
@@ -41,11 +41,11 @@ Creating trino-minio_hive-metastore_1    ... done
 Once this is complete, you can log into the Trino coordinator node. We will
 do this by using the [`exec`](https://docs.docker.com/engine/reference/commandline/exec/)
 command and run the `trino` CLI executable as the command we run on that
-container. Notice the container id is `trino-minio_trino-coordinator_1` so the
+container. Notice the container id is `trino-minio-trino-coordinator-1` so the
 command you will run is:
 
 ```
-docker container exec -it trino-minio_trino-coordinator_1 trino
+docker container exec -it trino-minio-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
