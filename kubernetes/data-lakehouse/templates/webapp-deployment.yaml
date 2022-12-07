@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: webapp
+  name: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: webapp
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: webapp
+    spec:
+      containers:
+        - env:
+            - name: AIRBYTE_ROLE
+            - name: AIRBYTE_VERSION
+              value: 0.38.4-alpha
+            - name: API_URL
+              value: /api/v1/
+            - name: FULLSTORY
+            - name: INTERNAL_API_HOST
+              value: airbyte-server:8001
+            - name: IS_DEMO
+            - name: OPENREPLAY
+            - name: PAPERCUPS_STORYTIME
+            - name: TRACKING_STRATEGY
+              value: segment
+          image: airbyte/webapp:0.38.4-alpha
+          name: airbyte-webapp
+          ports:
+            - containerPort: 80
+          resources: {}
+      restartPolicy: Always
+status: {}

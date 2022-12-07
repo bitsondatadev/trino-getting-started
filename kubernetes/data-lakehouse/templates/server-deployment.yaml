@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: server
+  name: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: server
+    spec:
+      containers:
+        - env:
+            - name: AIRBYTE_ROLE
+            - name: AIRBYTE_VERSION
+              value: 0.38.4-alpha
+            - name: CONFIGS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+              value: 0.35.15.001
+            - name: CONFIG_DATABASE_PASSWORD
+            - name: CONFIG_DATABASE_URL
+            - name: CONFIG_DATABASE_USER
+            - name: CONFIG_ROOT
+              value: /data
+            - name: DATABASE_PASSWORD
+              value: docker
+            - name: DATABASE_URL
+              value: jdbc:postgresql://db:5432/airbyte
+            - name: DATABASE_USER
+              value: docker
+            - name: JOBS_DATABASE_MINIMUM_FLYWAY_MIGRATION_VERSION
+              value: 0.29.15.001
+            - name: JOB_MAIN_CONTAINER_CPU_LIMIT
+            - name: JOB_MAIN_CONTAINER_CPU_REQUEST
+            - name: JOB_MAIN_CONTAINER_MEMORY_LIMIT
+            - name: JOB_MAIN_CONTAINER_MEMORY_REQUEST
+            - name: LOG_LEVEL
+              value: INFO
+            - name: NEW_SCHEDULER
+            - name: SECRET_PERSISTENCE
+            - name: TEMPORAL_HOST
+              value: airbyte-temporal:7233
+            - name: TRACKING_STRATEGY
+              value: segment
+            - name: WEBAPP_URL
+              value: http://localhost:8000/
+            - name: WORKER_ENVIRONMENT
+            - name: WORKSPACE_ROOT
+              value: /tmp/workspace
+          image: airbyte/server:0.38.4-alpha
+          name: airbyte-server
+          ports:
+            - containerPort: 8001
+          resources: {}
+          volumeMounts:
+            - mountPath: /tmp/workspace
+              name: workspace
+            - mountPath: /data
+              name: data
+            - mountPath: /tmp/airbyte_local
+              name: server-claim2
+      restartPolicy: Always
+      volumes:
+        - name: workspace
+          persistentVolumeClaim:
+            claimName: workspace
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: server-claim2
+          persistentVolumeClaim:
+            claimName: server-claim2
+status: {}

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: airbyte-temporal
+  name: airbyte-temporal
+spec:
+  ports:
+    - name: "7233"
+      port: 7233
+      targetPort: 7233
+  selector:
+    io.kompose.service: airbyte-temporal
+status:
+  loadBalancer: {}

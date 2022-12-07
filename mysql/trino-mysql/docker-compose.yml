@@ -1,7 +1,7 @@
 version: '3.7'
 services:
   trino-coordinator:
-    image: 'trinodb/trino:latest'
+    image: 'trinodb/trino:384'
     hostname: trino-coordinator
     ports:
       - '8080:8080'

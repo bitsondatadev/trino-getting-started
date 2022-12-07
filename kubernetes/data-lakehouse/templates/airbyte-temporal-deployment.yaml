@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: airbyte-temporal
+  name: airbyte-temporal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: airbyte-temporal
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f airbyte-docker-compose.yml
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: airbyte-temporal
+    spec:
+      containers:
+        - env:
+            - name: DB
+              value: postgresql
+            - name: DB_PORT
+              value: "5432"
+            - name: DYNAMIC_CONFIG_FILE_PATH
+              value: config/dynamicconfig/development.yaml
+            - name: LOG_LEVEL
+              value: INFO
+            - name: POSTGRES_PWD
+              value: docker
+            - name: POSTGRES_SEEDS
+              value: db
+            - name: POSTGRES_USER
+              value: docker
+          image: airbyte/temporal:0.38.4-alpha
+          name: airbyte-temporal
+          ports:
+            - containerPort: 7233
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/temporal/config/dynamicconfig
+              name: airbyte-temporal-claim0
+      restartPolicy: Always
+      volumes:
+        - name: airbyte-temporal-claim0
+          persistentVolumeClaim:
+            claimName: airbyte-temporal-claim0
+status: {}
