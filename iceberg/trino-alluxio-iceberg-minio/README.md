@@ -8,6 +8,10 @@ stored in these different storage systems, presenting unified client APIs and a
 global namespace to its upper layer data driven applications.
 There was recently a [Trino Community Broadcast that discussed Alluxio and Trino in more detail](https://trino.io/episodes/43.html)
 
+### Video Tutorial
+
+[![Watch the video](youtube.png)](https://youtu.be/yaxPEWRpEzc)
+
 ## Goals
 In this tutorial, you will:
  1. Learn how to configure Alluxio to point to S3 storage like MinIO.
@@ -123,7 +127,7 @@ container. Notice the container id is `trino-alluxio-iceberg-minio-trino-coordin
 command you will run is:
 
 ```
-docker container exec -it trino-minio_trino-coordinator_1 trino
+docker container exec -it trino-alluxio-iceberg-minio-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
