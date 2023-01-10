@@ -28,7 +28,7 @@ are in `trino-getting-started/lakefs/trino-lakefs-minio/` directory and run
 the following command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 You should expect to see the following output (you may also have to download

@@ -17,7 +17,7 @@ First, you want to start the services. Make sure that you are in the
 command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 You should expect to see the following output (you may also have to download

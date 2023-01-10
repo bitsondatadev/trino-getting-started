@@ -9,11 +9,11 @@ git clone git@github.com:bitsondatadev/trino-getting-started.git
 
 cd pinot/trino-pinot
 
-docker-compose up -d
+docker compose up -d
 ```
 
 **NOTE: There is an issue where zookeeper isn't completely ready before other
-containers start to load. You will likely need to run `docker-compose up -d`
+containers start to load. You will likely need to run `docker compose up -d`
 a second time until I get the fix in.**
 
 To do batch insert, we will stage a csv file to read the data in. Create a 

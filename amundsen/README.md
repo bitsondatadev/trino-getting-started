@@ -8,7 +8,7 @@ git clone git@github.com:bitsondatadev/trino-getting-started.git
 
 cd amundsen
 
-docker-compose up -d
+docker compose up -d
 ```
 
 Once all the services are running clone the Amundsen repository in a seperate
