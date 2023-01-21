@@ -113,7 +113,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add minio http://minio:9000 minio minio123) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc rm -r --force minio/alluxio;
+      # /usr/bin/mc rm -r --force minio/alluxio;
       /usr/bin/mc mb minio/alluxio;
       /usr/bin/mc policy set public minio/alluxio;
       exit 0;
