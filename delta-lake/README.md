@@ -46,12 +46,6 @@ Connect with your SQL client of choice. The following steps are applicable with
    blank.
 6. Open the SQL console and run the command to create a schema.
 
-```
-CREATE SCHEMA delta.myschema
-WITH (location=’s3a://claudiustestbucket/myschema');
-```
-Remember to change the location if you created the bucket under a different name.
-
 From here you can follow along with the demo, or try your own SQL queries. The
 following queries are used in the demo.
 
@@ -67,7 +61,7 @@ Check if there are any schemas:
 SHOW SCHEMAS FROM delta;
 ```
 
-Lets create a new schema:
+Let's create a new schema:
 
 ```sql
 CREATE SCHEMA delta.myschema WITH (location='s3a://claudiustestbucket/myschema');
