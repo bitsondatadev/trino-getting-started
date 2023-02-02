@@ -12,6 +12,8 @@ There was recently a [Trino Community Broadcast that discussed Alluxio and Trino
 
 [![Watch the video](youtube.png)](https://youtu.be/yaxPEWRpEzc)
 
+=======
+
 ## Goals
 In this tutorial, you will:
  1. Learn how to configure Alluxio to point to S3 storage like MinIO.
@@ -127,7 +129,11 @@ container. Notice the container id is `trino-alluxio-iceberg-minio-trino-coordin
 command you will run is:
 
 ```
+<<<<<<< HEAD
 docker container exec -it trino-alluxio-iceberg-minio-trino-coordinator-1 trino
+=======
+docker container exec -it trino-minio_trino-coordinator_1 trino
+>>>>>>> alluxio
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
