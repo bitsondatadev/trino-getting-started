@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <property>
+        <name>fs.defaultFS</name>
+        <value>s3a://BUCKET_NAME</value>
+    </property>
+
+
+    <!-- B2 properties -->
+    <property>
+        <name>fs.s3a.connection.ssl.enabled</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.endpoint</name>
+        <value>ENDPOINT</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.access.key</name>
+        <value>KEY_ID</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.secret.key</name>
+        <value>APPLICATION_KEY</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>fs.s3a.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+    </property>
+
+</configuration>
