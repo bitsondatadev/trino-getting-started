@@ -2,13 +2,13 @@
 
 This is an example of [DolphinScheduler](https://dolphinscheduler.apache.org/en-us)
 and Trino, we run these two services with docker compose, create a simple workflow
-in DolphinScheduler, and then add an example about combine with Trino job.
+in DolphinScheduler, and then add an example about combining with Trino job.
 
-> NOTE: DolphinScheduler with native Trino support is not released yet, so in this example
+> NOTE: DolphinScheduler with native Trino support is not released yet so in this example
 > we use the unofficial DolphinScheduler Docker image from
 > [zhongjiajie/dolphinscheduler-standalone-server](https://hub.docker.com/repository/docker/zhongjiajie/dolphinscheduler-standalone-server/general).
-> When DolphinScheduler version 3.2.0 is released, you can replace to the official Docker image
-> by modifying `.env` in current directory. `HUB` and `TAG` parameters should be changed.
+> When DolphinScheduler version 3.2.0 is released, you can replace the official Docker image
+> by modifying `.env` in the current directory. `HUB` and `TAG` parameters should be changed.
 
 ## Goals
 
@@ -21,12 +21,12 @@ In this tutorial, you will:
 
 ### Running Services
 
-First, you want to start the services. Make sure that you are in the 
+First, you want to start the services. Make sure that you are in the
 `trino-getting-started/hive/trino-minio` directory. Now run the following
 command:
 
 ```shell
-# clone the this repo source code, and go to dolphinscheduler directory
+# clone this repo source code, and go to dolphinscheduler directory
 git clone git@github.com:bitsondatadev/trino-getting-started.git
 cd trino-getting-started/dolphinscheduler
 
@@ -51,8 +51,8 @@ You can check the status of the services by running the following command:
 docker-compose ps
 ```
 
-You should expect to see the following output, when you see the status of
-both Trino and DolphinScheduler are `running (healthy)`, it means the services
+You should expect to see the following output when you see the status of
+both Trino and DolphinScheduler are `running (healthy)`, which means the services
 are ready to use.
 
 ```shell
@@ -63,7 +63,7 @@ dolphinscheduler-trino-coordinator-1   "/usr/lib/trino/bin/…"   trino-coordina
 
 ### Run A Simple Workflow With DolphinScheduler
 
-You can login dolphinscheduler with http://localhost:12345/dolphinscheduler/ui,
+You can log in dolphinscheduler with http://localhost:12345/dolphinscheduler/ui,
 the default username/password is `admin/dolphinscheduler123`.
 
 ![login](./gif/login.gif)
@@ -73,25 +73,25 @@ the default username/password is `admin/dolphinscheduler123`.
 Tenant is a concept that cannot be bypassed while using DolphinScheduler, so
 let's briefly introduce the concept of tenant first.
 
-The account named `admin` logged into DolphinScheduler called user in dolphinscheduler.
-In order to better control system resources, DolphinScheduler introduce the concept of
-tenants, which are used to actually execute tasks.
+The account named `admin` logged into DolphinScheduler is called user in dolphinscheduler.
+To better control system resources, DolphinScheduler introduce the concept of
+tenants, which are used to execute tasks.
 
 The brief is as follows:
 
-* User: login web ui, do all operations in the web ui, including workflow manage and tenant create.
-* Tenant: the actual executor of the task, A linux user for DolphinScheduler worker.
+* User: login web UI, do all operations in the web UI, including workflow management and tenant creation.
+* Tenant: the actual executor of the task, A Linux user for DolphinScheduler worker.
 
-We can create tenant in DolphinScheduler `Security -> Tenant Manage` page.
+We can create a tenant in DolphinScheduler `Security -> Tenant Manage` page.
 
 ![create-tenant](./gif/create-tenant.gif)
 
 #### Assign Tenant to User
 
-As we talked above in [Create Tenant](#create-tenant), the user can only run the task
+As we talked about above in [Create Tenant](#create-tenant), the user can only run the task
 unless the user is assigned to a tenant.
 
-We can assign tenant to specific user in DolphinScheduler `Security -> User Manage` page.
+We can assign a tenant to a specific user in DolphinScheduler `Security -> User Manage` page.
 
 ![assign-tenant](./gif/assign-tenant.gif)
 
@@ -105,43 +105,43 @@ simple workflow in DolphinScheduler.
 But in DolphinScheduler, all workflow must belong to a project, so we need
 to create a project first.
 
-We can create a project in DolphinScheduler `Project` page by click
+We can create a project in DolphinScheduler `Project` page by clicking
 `Create Project` button.
 
 ![create-project](./gif/create-project.gif)
 
 ##### Create Workflow
 
-Now we can create a workflow for project `tutorial`. Click the project we just created,
+Now we can create a workflow for the project `tutorial`. Click the project we just created,
 go to `Workflow Definition` page, click `Create Workflow` button, and we will redirect
-to workflow detail page.
+to the workflow detail page.
 
 ![create-workflow](./gif/create-workflow.gif)
 
 ##### Create Tasks
 
-We can use the mouse to drag the task you want to create from toolbar the workflow canvas. 
-In this case we create a `Shell` task. Entering the necessary information for the task,
-and we just fill the attribute `Node Name` with `Script` to the task for this simple workflow.
-After that, we can click the `Save` button save task into the workflow. We create another task
+We can use the mouse to drag the task you want to create from the toolbar in the workflow canvas.
+In this case, we create a `Shell` task. Entering the necessary information for the task,
+we just fill the attribute `Node Name` with `Script` to the task for this simple workflow.
+After that, we can click the `Save` button save the task into the workflow. We create another task
 using the same way.
 
 ![create-task](./gif/create-task.gif)
 
 ##### Set Task Dependency
 
-So we have two different tasks with different name and command to run in the workflow. The
-only thing missing for current workflow is the task dependency. We can add dependency using
-the mouse to drag the arrow from upstream task to the downstream and then release the mouse.
+So we have two different tasks with different names and commands to run in the workflow. The
+only thing missing from the current workflow is task dependency. We can add dependency using
+the mouse to drag the arrow from the upstream task to the downstream and then release the mouse.
 And you can see the link with the arrow between the two tasks is created, from the upstream
 task to the downstream one. Finally, we can click the `Save` button from the top right corner
-to save the workflow, do not forget enter the name of the workflow.
+to save the workflow, do not forget to fill name of the workflow.
 
 ![set-dependence](./gif/set-dep.gif)
 
 ##### Run Workflow
 
-After all set, we can run the workflow by click the `Online` and then the `Run` button from
+After all done, we can run the workflow by clicking the `Online` and then the `Run` button from
 the workflows list. If you want to see the workflow instance, just go to `Workflow Instance`
 page, you can see the workflow instance is running and the status is `Executing`.
 
@@ -151,9 +151,9 @@ page, you can see the workflow instance is running and the status is `Executing`
 
 If you want to view the task log, please click the workflow instance from the workflow instance
 list, then find the task you want to view the log, right-click the mouse and select `View Log`
-from the context dialog, and you can see the detail log of the task.
+from the context dialog, and you can see the detailed log of the task.
 
-You can the task task print the `Hello DolphinScheduler` and `Ending...` which is same as we
+You can the task print the `Hello DolphinScheduler` and `Ending...` which is the same as we
 define [in the task](#create-tasks).
 
 ![view-log](./gif/view-log.gif)
@@ -164,22 +164,22 @@ in DolphinScheduler, congratulations!
 ### Run Trino Task in DolphinScheduler
 
 A module named `Datasource` in DolphinScheduler is for managing all database connection information.
-In this section we will use it to create and manage Trino datasource.
+In this section, we will use it to create and manage Trino datasource.
 
 #### Create Datasource
 
-In order to separate the development and production environments, DolphinScheduler need to create a
+To separate the development and production environments, DolphinScheduler needs to create a
 test data source before we create the production one. If you do not use the development environment,
 you can just make development and production datasource in the same. And in this tutorial we will also
 do that.
 
-Create a development one first, by click `Create Datasource` button in `Datasource` page, and fill
+Create a development one first, by clicking `Create Datasource` button in `Datasource` page, and fill
 the necessary information, and then click `Save` button to save the development datasource. And the
-production one follow the same way to create, but when you select the production button, DolphinScheduler
-will ask you connect the exists development datasource, we can select the datasource we just created
+production one follows the same way to create, but when you select the production button, DolphinScheduler
+will ask you to connect the exists development datasource, we can select the datasource we just created
 and click `Save` button to save the production datasource.
 
-And for the detail information of this tutorial is as follows:
+And for the detailed information of this tutorial is as follows:
 
 ```json
 {
@@ -191,7 +191,7 @@ And for the detail information of this tutorial is as follows:
 }
 ```
 
-please remember change the `Datasource Name` to `trino-prod` when you create the production datasource.
+please remember to change the `Datasource Name` to `trino-prod` when you create the production datasource.
 
 ![create-datasource](./gif/create-datasource.gif)
 
@@ -214,7 +214,7 @@ SELECT * FROM tpch.tiny.customer LIMIT 10
 
 #### Run Workflow with SQL Task
 
-The step run workflow with SQL task is same as [run workflow](#run-workflow) section, and we can follow
+The step run workflow with SQL task is the same as [run workflow](#run-workflow) section, and we can follow
 [view log](#view-log) section to view the log of the SQL task.
 
 In this case, we can see the top 10 records of the `customer` table in the log, the detail is:
@@ -235,12 +235,12 @@ row 10 : {"custkey":1135,"name":"Customer#000001135","address":"cONv9cxslXOefPzh
 
 ![run-sql-task-view-log](./gif/run-sql-task-view-log.gif)
 
-And that is a simple tutorial of how to use the Trino task in DolphinScheduler.
+And that is a simple tutorial on how to use the Trino task in DolphinScheduler.
 
 ### Stopping Services
 
-Once you complete this tutorial, the resources used for this excercise can be released
-by runnning the following command:
+Once you complete this tutorial, the resources used for this exercise can be released
+by running the following command:
 
 ```shell
 docker-compose down
