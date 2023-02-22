@@ -22,7 +22,7 @@ In this tutorial, you will:
 ### Running Services
 
 First, you want to start the services. Make sure that you are in the
-`trino-getting-started/hive/trino-minio` directory. Now run the following
+`trino-getting-started/dolphinscheduler` directory. Now run the following
 command:
 
 ```shell
