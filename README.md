@@ -32,11 +32,11 @@ The first level of directories in this repo are generally organized by [connecto
 
 ### Start Service
 
-`docker-compose up -d`
+`docker compose up -d`
 
 ### Stop Service
 
-`docker-compose stop`
+`docker compose stop`
 
 ### Clean Service
 
@@ -66,6 +66,6 @@ The first level of directories in this repo are generally organized by [connecto
 
 ### List Service Process information
 
-`docker-compose ps`
+`docker compose ps`
 
 See trademark and other [legal notices](https://trino.io/legal.html).
