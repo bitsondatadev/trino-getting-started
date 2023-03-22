@@ -36,21 +36,50 @@ services:
       - mariadb
     networks:
       - trino-network
-
+# https://min.io/docs/minio/linux/operations/install-deploy-manage/migrate-fs-gateway.html#overview
+# https://github.com/minio/minio/discussions/15967
   minio:
     hostname: minio
-    image: 'minio/minio:latest'
+    image: 'minio/minio:RELEASE.2022-10-24T18-35-07Z'
     container_name: minio
     ports:
       - '9000:9000'
+      - '9001:9001'
     volumes:
-      - minio-data:/data
+      - minio-data:/mnt/data
     environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+      # MINIO_ACCESS_KEY and MINIO_SECRET_KEY are deprecated since version RELEASE.2021-04-22T15-44-28Z.
+      # https://min.io/docs/minio/linux/reference/minio-server/minio-server.html#envvar.MINIO_ACCESS_KEY
       MINIO_ACCESS_KEY: minio
       MINIO_SECRET_KEY: minio123
-    command: server /data
+      MINIO_VOLUMES: /mnt/data
+    command: server /mnt/data  --console-address ":9001"
     networks:
       - trino-network
+
+  minio-setup:
+    depends_on:
+      - minio
+    image: minio/mc
+    container_name: mc
+    environment:
+      - MINIO_ACCESS_KEY=minio
+      - MINIO_SECRET_KEY=minio123
+    networks:
+      - trino-network
+    volumes:
+      - minio-data:/mnt/data
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc config host add minio http://minio:9000 minio minio123) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force minio/datalake;
+      /usr/bin/mc mb minio/datalake;
+      /usr/bin/mc policy set public minio/datalake;
+      exit 0;
+      "   
+
 
 volumes:
   minio-data:
