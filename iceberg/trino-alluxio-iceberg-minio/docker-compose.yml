@@ -53,7 +53,7 @@ services:
       - trino-network
 
   mariadb:
-    image: 'mariadb:latest'
+    image: 'mariadb:10.9.7'
     hostname: mariadb
     ports:
       - '3306:3306'
