@@ -23,7 +23,7 @@ First, you want to start the services. Make sure that you are in the
 command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 You should expect to see the following output (you may also have to download
@@ -31,7 +31,7 @@ the Docker images before you see the "done" message):
 
 ```
 [+] Running 4/4
- ⠿ Network trino-b2_trino-network          Created  0.0s
+ ⠿ Network trino-b2-trino-network          Created  0.0s
  ⠿ Container trino-b2-mariadb-1            Started  0.6s
  ⠿ Container trino-b2-trino-coordinator-1  Started  0.6s
  ⠿ Container trino-b2-hive-metastore-1     Started  0.7s
@@ -42,7 +42,7 @@ the Docker images before you see the "done" message):
 Once this is complete, you can log into the Trino coordinator node. We will
 do this by using the [`exec`](https://docs.docker.com/engine/reference/commandline/exec/)
 command and run the `trino` CLI executable as the command we run on that
-container. Notice the container id is `trino-b2_trino-coordinator_1` so the
+container. Notice the container id is `trino-b2-trino-coordinator-1` so the
 command you will run is:
 
 ```
@@ -244,7 +244,7 @@ scheme of Trino's use of it in the Hive connector.
 Open another terminal and run the following command:
 
 ```
-docker container exec -it "trino-b2_mariadb_1" /bin/bash
+docker container exec -it "trino-b2-mariadb-1" /bin/bash
 ```
 
 Once you see the `root@mariadb` terminal, enter into the cli.
@@ -497,7 +497,7 @@ Once you're done, the resources used for this exercise can be released
 by running the following command:
 
 ```
-docker-compose down
+docker compose down
 ```
 
 See trademark and other [legal notices](https://trino.io/legal.html).

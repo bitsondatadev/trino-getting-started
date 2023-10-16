@@ -16,6 +16,8 @@ services:
     hostname: mariadb
     ports:
       - '3306:3306'
+    volumes:
+      - maria_volume:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_USER: admin
@@ -37,6 +39,9 @@ services:
       - mariadb
     networks:
       - trino-network
+
+volumes:
+  maria_volume:
 
 networks:
   trino-network:
