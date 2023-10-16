@@ -100,7 +100,7 @@ First, you want to start the services. Make sure that you are in the
 command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 You should expect to see the following output. Docker may also have to download
@@ -230,7 +230,7 @@ Once you complete this tutorial, the resources used for this excercise can be re
 by runnning the following command:
 
 ```
-docker-compose down
+docker compose down
 ```
 
 See trademark and other [legal notices](https://trino.io/legal.html).

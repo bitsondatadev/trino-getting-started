@@ -21,7 +21,7 @@ for a full demo, and check the show notes for SQL sample queries.
 Start the Docker containers:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 Connect with your SQL client of choice. The following steps are applicable with

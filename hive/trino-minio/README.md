@@ -21,7 +21,7 @@ First, you want to start the services. Make sure that you are in the
 command:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 
 You should expect to see the following output (you may also have to download
@@ -41,11 +41,11 @@ Creating trino-minio_hive-metastore_1    ... done
 Once this is complete, you can log into the Trino coordinator node. We will
 do this by using the [`exec`](https://docs.docker.com/engine/reference/commandline/exec/)
 command and run the `trino` CLI executable as the command we run on that
-container. Notice the container id is `trino-minio_trino-coordinator_1` so the
+container. Notice the container id is `trino-minio-trino-coordinator-1` so the
 command you will run is:
 
 ```
-docker container exec -it trino-minio_trino-coordinator_1 trino
+docker container exec -it trino-minio-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
@@ -175,7 +175,7 @@ scheme of Trino's use of it in the Hive connector.
 Open another terminal and run the following command:
 
 ```
-docker container exec -it "trino-minio_mariadb_1" /bin/bash
+docker container exec -it "trino-minio-mariadb-1" /bin/bash
 ```
 
 Once you see the `root@mariadb` terminal, enter into the cli.
@@ -359,7 +359,7 @@ Once you complete this tutorial, the resources used for this excercise can be re
 by runnning the following command:
 
 ```
-docker-compose down
+docker compose down
 ```
 
 

@@ -6,7 +6,7 @@ git clone git@github.com:bitsondatadev/trino-getting-started.git
 
 cd druid/trino-druid
 
-docker-compose up -d
+docker compose up -d
 ```
 
 To do batch insert, we can navigate to the Druid Web UI once it has finished
