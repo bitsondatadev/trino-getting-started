@@ -40,7 +40,7 @@ container. Notice the container id is `trino-mysql_trino-coordinator_1` so the
 command you will run is:
 
 ```
-docker container exec -it trino-mysql_trino-coordinator_1 trino
+docker container exec -it trino-mysql-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
