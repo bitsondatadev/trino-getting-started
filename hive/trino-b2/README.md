@@ -32,7 +32,7 @@ the Docker images before you see the "done" message):
 ```
 [+] Running 5/5
  ✔ Network trino-b2_trino-network          Created  0.0s 
- ✔ Volume "trino-b2_maria-volume"          Created  0.0s 
+ ✔ Volume "trino-b2_maria_volume"          Created  0.0s 
  ✔ Container trino-b2-mariadb-1            Started  0.4s 
  ✔ Container trino-b2-trino-coordinator-1  Started  0.4s 
  ✔ Container trino-b2-hive-metastore-1     Started  0.7s
