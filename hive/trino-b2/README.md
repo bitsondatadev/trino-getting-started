@@ -431,18 +431,26 @@ when inserting using the Hive connector.
 
 [Drive Stats](https://www.backblaze.com/b2/hard-drive-test-data.html) is a public data set of the daily metrics on the hard drives in Backblaze’s cloud storage infrastructure that Backblaze has open-sourced starting with April 2013. Currently, Drive Stats comprises over 346 million records, rising by over 200,000 records per day. Drive Stats is an append-only dataset effectively logging daily statistics that once written are never updated or deleted.
 
-Each day, Backblaze collects a Drive Stats record from each hard drive containing the following data:
+Each day, Backblaze collects a Drive Stats record from each hard drive containing some or all the following fields:
 
 * **date**: the date of collection.
 * **serial_number**: the unique serial number of the drive.
 * **model**: the manufacturer’s model number of the drive.
 * **capacity_bytes**: the drive’s capacity, in bytes.
 * **failure**: 1 if this was the last day that the drive was operational before failing, 0 if all is well.
+* **datacenter**: the data center containing the drive; currently one of `ams5` (Amsterdam, Netherlands), `iad1` (Reston, VA), `phx1` (Phoenix, AZ), `sac0` (Sacramento, CA), `sac2` (Stockton, CA), or an empty string.
+* **cluster_id**: the cluster containing the drive; currently one of  `0`, `20`, `31`, `40`, `50`, `52`. 
+* **vault_id**: the vault containing the drive; four digits, for example, `1042`.
+* **pod_id**: the identifier of the drive's pod within its vault; an integer between 1 and 20 inclusive.
+* **pod_slot_num**: the drive's slot within its pod; an integer between 1 and 59 inclusive. May be NULL.
+* **is_legacy_format**: for future use; currently always 0.
 * **A collection of [SMART](https://www.backblaze.com/blog/what-smart-stats-indicate-hard-drive-failures/) attributes**. The number of attributes collected has risen over time; currently we store 87 SMART attributes in each record, each one in both raw and normalized form, with field names of the form smart_n_normalized and smart_n_raw, where n is between 1 and 255.
 
-In total, each record currently comprises 179 fields of data describing the state of an individual hard drive on a given day (the number of SMART attributes collected has risen over time).
+The `vault_id`, `pod_id`, and `is_legacy_format` fields were introduced in Q2 2023 and are explained further in [Backblaze Drive Stats for Q2 2023](https://www.backblaze.com/blog/backblaze-drive-stats-for-q2-2023/), while `datacenter`, `cluster_id` and `pod_slot_num` appeared in Q3 2023 and are covered in [Backblaze Drive Stats for Q3 2023](https://www.backblaze.com/blog/backblaze-drive-stats-for-q3-2023/). These fields are `NULL` in records created before their introduction.
 
-The entire Backblaze Drive Stats data set is available in Parquet format in a public Backblaze B2 bucket. At the time of writing, the data set comprises 171 files occupying 18.5 GiB of storage.
+In total, each record currently comprises 195 data fields describing the location and state of an individual hard drive on a given day (the number of SMART attributes collected has risen over time).
+
+The entire Backblaze Drive Stats data set is available in Parquet format in a public Backblaze B2 bucket. At the time of writing, the data set comprises 200 files occupying 21.7 GiB of storage.
 
 To access the Drive Stats data set via Trino, [start Trino as explained above](#running-services), then follow the [instructions above for configuring Trino](#configuring-trino), with the following configuration values: 
 
@@ -492,6 +500,14 @@ FROM drivestats
 GROUP BY model
 ORDER BY count DESC
 LIMIT 10;
+```
+
+#### How many drives were in the various Backblaze data centers on a given date?
+```sql
+SELECT datacenter, COUNT(*) AS count
+FROM drivestats
+WHERE year = 2024 AND month = 6 AND day = 30
+GROUP BY datacenter;
 ```
 
 You can learn more about querying the Drive Stats data set from [Querying a Decade of Drive Stats Data](http://linktbd).
