@@ -42,7 +42,7 @@ The `community-tutorials/` directory contains a list of tutorials that have litt
 
 | Tutorial | Description |
 | --- | --- |
-| [Trino on Backblaze b2](https://github.com/backblaze-b2-samples/trino-getting-started-b2) | These tutorials by @metadaddy demonstrate how to use Trino with Backblaze b2 as an S3 object storage with connectors like Hive and Iceberg. |
+| [Trino on Backblaze b2](https://github.com/backblaze-b2-samples/trino-getting-started-b2) | These tutorials by [@metadaddy](https://github.com/metadaddy) demonstrate how to use Trino with Backblaze B2 as an S3 object storage with connectors like Hive and Iceberg. |
 
 ## Helpful Docker commands
 
