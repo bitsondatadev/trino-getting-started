@@ -1,0 +1,20 @@
+{
+  "identities": [
+    {
+      "name": "storage",
+      "credentials": [
+        {
+          "accessKey": "storage",
+          "secretKey": "storage123"
+        }
+      ],
+      "actions": [
+        "Read:databucks",
+        "Write:databucks",
+        "List:databucks",
+        "Tagging:databucks",
+        "Admin:databucks"
+      ]
+    }
+  ]
+}

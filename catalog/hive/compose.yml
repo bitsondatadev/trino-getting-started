@@ -1,0 +1,44 @@
+include:
+  - ../../storage/minio/compose.yml
+  #- ../../storage/seaweedfs/compose.yml
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    hostname: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: metastore_db
+
+  hive-metastore:
+    image: 'apache/hive:4.0.1'
+    hostname: hive-metastore
+    ports:
+      - '9083:9083' # Metastore Thrift
+    volumes:
+      - ./conf/metastore-site.xml:/opt/hive/conf/metastore-site.xml:ro
+      - ./lib/postgresql-42.7.4.jar:/opt/hive/lib/postgres.jar
+    environment:
+      HIVE_AUX_JARS_PATH: /opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.3.6.jar:/opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.367.jar
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: '
+        -Xmx1G 
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore_db
+        -Djavax.jdo.option.ConnectionUserName=hive
+        -Djavax.jdo.option.ConnectionPassword=password'
+        #-Dhive.metastore.warehouse.dir=seaweedfs://s3:9333/hive/warehouse
+
+    depends_on:
+      - postgres
+
+
+volumes:
+  data:
+    driver: local
