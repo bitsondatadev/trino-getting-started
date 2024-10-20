@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<configuration>
+
+    <property>
+        <name>fs.defaultFS</name>
+        <value>seaweedfs://s3:9333</value>
+    </property>
+    <property>
+        <name>fs.seaweedfs.impl</name>
+        <value>seaweed.hdfs.SeaweedFileSystem</value>
+    </property>
+    <property>
+       <name>fs.AbstractFileSystem.seaweedfs.impl</name>
+       <value>seaweed.hdfs.SeaweedAbstractFileSystem</value>
+    </property>
+    <property>
+       <name>fs.seaweed.buffer.size</name>
+       <value>4194304</value>
+    </property>
+
+</configuration>

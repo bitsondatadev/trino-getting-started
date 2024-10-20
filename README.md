@@ -26,15 +26,22 @@ to using Trino.
  
 ## Prerequisites
 
-In order to use this repository you need to have [Docker](https://www.docker.com/why-docker) installed to run your service [containers](https://www.docker.com/why-docker). Check if you have Docker installed by running `docker --version`. If Docker isn't found, please refer to the [install insructions](https://docs.docker.com/engine/install/) and install Docker before trying to run these tutorials. If you're on mac or windows, you will just need to install docker desktop. If you're on a linux distribution, you will just need to install the docker engine.
+For beginners, I recommend using [Docker](https://www.docker.com/why-docker) to run your service [containers](https://www.docker.com/why-docker). I do not use the `version` tag for compose files and therefore don't provide support for [legacy compose versions](https://docs.docker.com/reference/compose-file/legacy-versions/). Make sure you have the correct Docker Compose version by having one of the following installed.
 
-## Layout
 
-The first level of directories in this repo are generally organized by [connector](https://trino.io/docs/current/connector.html). Concepts such as security, clients, or basics will have their own directory as well. The second level of directories contain the actual environment and tutorial directories themselves. In order to run the environment, you need to be in one of these directories that have a docker-compose.yml file in it. The second level of directories contain the actual environment and tutorial directories themselves. In order to run the environment, you need to be in one of these directories that have a docker-compose.yml file in it.
+ * [Docker Desktop](https://docs.docker.com/desktop/) >= [4.1.0](https://docs.docker.com/desktop/release-notes/#410)(latest recommended)
+ 
+ or
 
+ * Docker Engine and Docker Compose [with compose version >= 1.27.0](https://docs.docker.com/reference/compose-file/legacy-versions/).
+
+
+## Tutorial Layout
+
+Tutorials are organized by a concept, most commonly a [connector](https://trino.io/docs/current/connector.html). Concepts such as security, clients, or basics should use their own directory as well. There may also be another directory that contains the actual environment and tutorial directories themselves. When running a tutorial command, ensure you're in the correct directory and that it contains a `docker-compose.yml` file in it. 
 
 > [!IMPORTANT]  
-> The layout of this repository [has been updated](https://github.com/bitsondatadev/trino-getting-started/issues/53) to minimize the scope of this repository to 
+> The layout of this repository [has migrated](https://github.com/bitsondatadev/trino-getting-started/issues/53) most concept tutorials to the `community-tutorials/` directory or adopted into other repositories to minimize the scope of this repository to the most common Trino use cases.
 
 ### Community Tutorials
 

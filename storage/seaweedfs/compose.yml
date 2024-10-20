@@ -1,0 +1,23 @@
+services:
+  s3gateway:
+    image: chrislusf/seaweedfs
+    hostname: s3gateway
+    ports:
+      - 8333:8333 #s3 api
+      - 9333:9333 #leader
+      - 19333:19333 #leader grpc
+      - 8081:8081 #volume
+      - 18081:18081 #volume grpc
+      - 8888:8888 #filer
+      - 18888:18888 #filer grpc
+    command: >
+      "server -filer -s3" #command starts leader + volume + filer + s3 gateway in one node
+      "-ip=s3 -ip.bind=0.0.0.0 -dir=/var/lib/seaweedfs/leader " #leader settings
+      "-volume.port=8081 -volume.dir.idx=/var/lib/seaweedfs/volume " #volume settings
+    volumes:
+      # state files
+      - ./data/leader:/var/lib/seaweedfs/leader
+      - ./data/volume:/var/lib/seaweedfs/volume
+      - ./data/filer:/data
+      # init files for s3
+      - ./s3init.json:/etc/seaweedfs/s3init.json

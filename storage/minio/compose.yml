@@ -1,0 +1,46 @@
+services:
+# https://min.io/docs/minio/linux/operations/install-deploy-manage/migrate-fs-gateway.html#overview
+# https://github.com/minio/minio/discussions/15967
+  s3gateway:
+    hostname: s3gateway
+    image: 'minio/minio:RELEASE.2022-10-24T18-35-07Z'
+    container_name: s3gateway
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - data:/mnt/data
+    environment:
+      MINIO_ROOT_USER: storage
+      MINIO_ROOT_PASSWORD: storage123
+      # MINIO_ACCESS_KEY and MINIO_SECRET_KEY are deprecated since version RELEASE.2021-04-22T15-44-28Z.
+      # https://min.io/docs/minio/linux/reference/minio-server/minio-server.html#envvar.MINIO_ACCESS_KEY
+      MINIO_ACCESS_KEY: storage
+      MINIO_SECRET_KEY: storage123
+      MINIO_VOLUMES: /mnt/data
+    command: server /mnt/data  --console-address ":9001"
+
+  s3init:
+    image: 'minio/mc:RELEASE.2022-10-22T03-39-29Z'
+    container_name: s3init
+    environment:
+      - MINIO_ACCESS_KEY=storage
+      - MINIO_SECRET_KEY=storage123
+    volumes:
+      - data:/mnt/data
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/mc config host add s3gateway http://s3gateway:9000 storage storage123) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/mc rm -r --force s3gateway/databucks;
+      /usr/bin/mc mb s3gateway/databucks;
+      /usr/bin/mc policy set public s3gateway/databucks;
+      exit 0;
+      "   
+    depends_on:
+      - s3gateway
+
+
+volumes:
+  data:
+    driver: local
+
