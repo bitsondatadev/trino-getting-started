@@ -19,6 +19,8 @@ services:
       MINIO_SECRET_KEY: storage123
       MINIO_VOLUMES: /mnt/data
     command: server /mnt/data  --console-address ":9001"
+    networks:
+      - fedinet
 
   s3init:
     image: 'minio/mc:RELEASE.2022-10-22T03-39-29Z'
@@ -31,16 +33,20 @@ services:
     entrypoint: >
       /bin/sh -c "
       until (/usr/bin/mc config host add s3gateway http://s3gateway:9000 storage storage123) do echo '...waiting...' && sleep 1; done;
-      /usr/bin/mc rm -r --force s3gateway/databucks;
+      /usr/bin/mc rm -r --force --quiet s3gateway/databucks;
       /usr/bin/mc mb s3gateway/databucks;
-      /usr/bin/mc policy set public s3gateway/databucks;
+      /usr/bin/mc anonymous set public s3gateway/databucks;
       exit 0;
       "   
     depends_on:
       - s3gateway
-
+    networks:
+      - fedinet
 
 volumes:
   data:
     driver: local
 
+networks:
+  fedinet:
+    name: compose_network

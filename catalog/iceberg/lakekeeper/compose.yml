@@ -1,0 +1,75 @@
+include:
+  - ../../../storage/minio/compose.yml
+  #- ../../../storage/seaweedfs/compose.yml
+
+services:
+  postgres:
+    image: 'postgres:latest'
+    hostname: postgres-db
+    ports:
+      - '5432:5432'
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: iceberg
+      PGUSER: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -p 5432 -d postgres" ]
+      interval: 2s
+      timeout: 10s
+      retries: 2
+      start_period: 10s
+    networks:
+      - fedinet
+
+  lakekeeper:
+    image: 'quay.io/lakekeeper/catalog:latest'
+    environment:
+      - ICEBERG_REST__BASE_URI=http://lakekeeper:8181
+      - ICEBERG_REST__LISTEN_PORT=8181
+      - ICEBERG_REST__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
+      - ICEBERG_REST__PG_DATABASE_URL_READ=postgresql://postgres:password@postgres-db:5432/iceberg
+      - ICEBERG_REST__PG_DATABASE_URL_WRITE=postgresql://postgres:password@postgres-db:5432/iceberg
+      - ICEBERG_REST__DEFAULT_PROJECT_ID=00000000-0000-0000-0000-000000000000
+      - RUST_LOG=trace,tower_http=trace,axum=trace,sqlx=trace,iceberg-catalog=trace,iceberg_catalog::implementations::postgres::task_queues=warn
+    ports:
+      - "8181:8181"
+    command: [ "serve" ]
+    healthcheck:
+      test: [ "CMD", "/home/nonroot/iceberg-catalog", "healthcheck" ]
+      interval: 1s
+      timeout: 10s
+      retries: 3
+      start_period: 3s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    networks:
+      - fedinet
+
+  migrate:
+    image: 'quay.io/lakekeeper/catalog:latest'
+    environment:
+      - ICEBERG_REST__PG_ENCRYPTION_KEY=This-is-NOT-Secure!
+      - ICEBERG_REST__PG_DATABASE_URL_READ=postgresql://postgres:password@postgres-db:5432/iceberg
+      - ICEBERG_REST__PG_DATABASE_URL_WRITE=postgresql://postgres:password@postgres-db:5432/iceberg
+      - RUST_LOG=info
+    restart: "no"
+    entrypoint: [ "/home/nonroot/iceberg-catalog", "migrate" ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - fedinet
+
+volumes:
+  data:
+    driver: local
+
+networks:
+  fedinet:
+    name: compose_network

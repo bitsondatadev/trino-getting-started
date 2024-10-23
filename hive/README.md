@@ -21,7 +21,7 @@ First, you want to start the services. Make sure that you are in the
 command:
 
 ```
-docker compose up -d
+docker compose up -d && docker compsoe rm -f
 ```
 
 ### Open Trino CLI
@@ -29,11 +29,10 @@ docker compose up -d
 Once this is complete, you can log into the Trino coordinator node. We will
 do this by using the [`exec`](https://docs.docker.com/engine/reference/commandline/exec/)
 command and run the `trino` CLI executable as the command we run on that
-container. Notice the container id is `trino-minio-trino-coordinator-1` so the
-command you will run is:
+container. 
 
 ```
-docker container exec -it trino-minio-trino-coordinator-1 trino
+docker container exec -it <dir-prefix>-trino-coordinator-1 trino
 ```
 
 When you start this step, you should see the `trino` cursor once the startup
@@ -47,14 +46,28 @@ connector is to run a CTAS (CREATE TABLE AS) query that pushes data from one of
 the TPC connectors into the hive catalog that points to MinIO. The TPC
 connectors generate data on the fly so that we can run simple tests like this.
 
-First, run a command to show the catalogs to see the `tpch` and `minio` catalogs
+```
+CREATE CATALOG hive USING hive
+WITH (
+  "hive.metastore.uri" = 'thrift://hive-metastore:9083',
+  "hive.non-managed-table-writes-enabled" = 'true',
+  "fs.native-s3.enabled" = 'true',
+  "s3.region"= 'local-1',
+  "s3.path-style-access" = 'true',
+  "s3.endpoint" = 'http://s3gateway:9000',
+  "s3.aws-access-key" = 'storage',
+  "s3.aws-secret-key" = 'storage123'
+);
+```
+
+First, run a command to show the catalogs to see the `tpch` and `hive` catalogs
 since these are what we will use in the CTAS query.
 
 ```
 SHOW CATALOGS;
 ```
 
-You should see that the minio catalog is registered. This is actually a Hive
+You should see that the hive catalog is registered. This is actually a Hive
 connector configured under the name `hive` to delineate the underlying storage
 we are using.
 
@@ -66,7 +79,7 @@ this layer was commonly HDFS or other S3 compatible storage and AWS S3. For our
 example, we're using MinIO which is also S3 compatible. Creating a bucket gives
 us a location to write our data to and we can tell Trino where to find it.
 
-![Storage](./assets/storage.png)
+![Storage](../assets/storage.png)
 
 Now, open the [MinIO UI](http://localhost:9000) and log in using:
 
@@ -74,11 +87,11 @@ Access Key: storage
 
 Secret Key: storage123
 
-![MinIO Login Screen](./assets/login.png)
+![MinIO Login Screen](../assets/login.png)
 
 Upon logging in, you will see the following screen. 
 
-![Minio File Browser](./assets/minio.png)
+![Minio File Browser](../assets/minio.png)
 
 ### Querying Trino
 
@@ -97,12 +110,12 @@ Hive and MySQL
 
 ![Runtime](./assets/runtime.png)
 
-Back in the terminal create the minio.tiny SCHEMA. This will be the first call
+Back in the terminal create the hive.tiny SCHEMA. This will be the first call
 to the metastore to save the location of the S3 schema location in MinIO.
 
 ```
 CREATE SCHEMA hive.tiny
-WITH (location = 's3a://databucks/');
+WITH (location = 's3a://databucks/tiny/');
 ```
 
 Now that we have a SCHEMA that references the bucket where we store our tables 
@@ -118,8 +131,7 @@ query. Run the following query and if you like, watch it running on the Trino UI
 ```
 CREATE TABLE hive.tiny.customer
 WITH (
-    format = 'Parquet',
-    external_location = 's3a://tiny/customer/'
+    external_location = 's3a://databucks/tiny/customer/'
 ) 
 AS SELECT * FROM tpch.tiny.customer;
 ```
@@ -146,8 +158,8 @@ is an orc file to being with? Find out more in the next step.
 
 In order for Trino to know where to locate this file, it uses the Hive
 metastore to manage and store this information or metadata in a relational
-database that the metastore points to, in this case our `mariadb` instance.
-Execute the following statement to log into the `mariadb` instance and follow
+database that the metastore points to, in this case our `postgres` instance.
+Execute the following statement to log into the `postgres` instance and follow
 the remaining commands to learn how the metadata gets split into different
 tables. Understanding this model will also solidify the metastore's role in the
 scheme of Trino's use of it in the Hive connector.
@@ -155,14 +167,10 @@ scheme of Trino's use of it in the Hive connector.
 Open another terminal and run the following command:
 
 ```
-docker container exec -it "trino-minio-mariadb-1" /bin/bash
+docker container exec -it "<dir-prefix>-postgres-1" /bin/bash
 ```
 
-Once you see the `root@mariadb` terminal, enter into the cli.
-
-```
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD"
-```
+Enter into postgres using `psql`.
 
 Now that you're in the metastore's database command line interface, you can run 
 SQL commands on this database to see where the metadata is stored. First, let's
